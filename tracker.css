@@ -1,0 +1,267 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+    margin: 0;
+    padding: 24px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.back-link {
+    align-self: flex-start;
+    margin-bottom: 16px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.welcome-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-card {
+    width: min(560px, 100%);
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+    text-align: center;
+}
+
+.welcome-text {
+    margin-bottom: 24px;
+    color: #4b5563;
+    font-size: 18px;
+}
+
+.choice-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.choice-card {
+    display: block;
+    padding: 20px;
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #1e40af;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.choice-card:hover {
+    transform: translateY(-2px);
+    background: #dbeafe;
+}
+
+.choice-card h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.choice-card p {
+    margin: 0;
+    color: #334155;
+}
+
+form {
+    max-width: 420px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none;
+}
+
+.set-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.secondary-button {
+    width: 100%;
+    padding: 12px 16px;
+    background: #f3f4f6;
+    border: 1px solid #cbd5e1;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #2563eb;
+    border-radius: 4px;
+    background: #ffffff;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.secondary-button[aria-pressed="true"] .toggle-box {
+    background: #2563eb;
+    position: relative;
+}
+
+.secondary-button[aria-pressed="true"] .toggle-box::after {
+    content: "✔";
+    color: #ffffff;
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.secondary-button:hover {
+    background: #e5e7eb;
+    border-color: #94a3b8;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 12px 16px;
+    background: #2563eb;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background: #1d4ed8;
+}
+
+.subtext {
+    margin-top: 4px;
+    margin-bottom: 16px;
+    color: #4b5563;
+}
+
+#workoutList {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+}
+
+.workout-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.workout-button:hover {
+    transform: translateY(-1px);
+    background: #dbeafe;
+}
+
+.result-card {
+    max-width: 420px;
+    margin: 32px auto 0;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+    text-align: center;
+}
+
+#resultText {
+    margin-top: 16px;
+    font-size: 18px;
+    color: #111827;
+}
+
+#backButton {
+    margin-top: 24px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#backButton:hover {
+    background: #1d4ed8;
+}
+
+.chart-card {
+    max-width: 760px;
+    margin: 32px auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+.chart-card canvas {
+    display: block;
+    width: 100%;
+    max-width: 700px;
+    height: 320px;
+    margin: 0 auto;
+}
+
+.chart-details {
+    margin-top: 18px;
+    color: #334155;
+    line-height: 1.6;
+}

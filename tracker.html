@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <link rel="stylesheet" href="tracker.css">
+</head>
+<body>
+    <a class="back-link" href="welcome.html">← Back to welcome</a>
+
+    <form>
+        <label for="exercise">What did we do today?</label>
+        <input type="text" id="exercise">
+        <div></div>
+        <label for="sets">How Many Sets?</label>
+        <input type="number" id="sets" min="1">
+
+        <div></div>
+        <button type="button" id="differentSetsButton" class="secondary-button" aria-pressed="false">
+            <span class="toggle-box" aria-hidden="true"></span>
+            <span>Different weights/reps for each set?</span>
+        </button>
+
+        <div></div>
+        <div class="uniform-fields">
+            <label for="reps">How Many Reps?</label>
+            <input type="number" id="reps" min="1">
+            <div></div>
+            <label for="weight">How Much Weight?</label>
+            <input type="number" id="weight" min="1">
+        </div>
+
+        <div id="variableSetFields" class="hidden"></div>
+
+        <div></div>
+        <button type="submit">Add Workout</button>
+    </form>
+
+    <h2>Previous workouts</h2>
+    <p class="subtext">Click a saved workout to prefill the form and then submit a new entry to compare it to your history.</p>
+    <div id="workoutList"></div>
+
+    <script src="tracker.js"></script>
+</body>
+</html>
