@@ -12,6 +12,29 @@ body {
     box-sizing: border-box;
 }
 
+.page-header {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+}
+
+.login-button {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background: #1d4ed8;
+}
+
 .back-link {
     align-self: flex-start;
     margin-bottom: 16px;
@@ -86,6 +109,14 @@ form {
     border: 1px solid #d1d5db;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+.auth-form {
+    max-width: 100%;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
 label {
@@ -178,6 +209,16 @@ button[type="submit"]:hover {
     background: #1d4ed8;
 }
 
+.login-message {
+    margin-top: 12px;
+    font-weight: 700;
+    color: #166534;
+}
+
+input.invalid {
+    border-color: #b91c1c;
+}
+
 .subtext {
     margin-top: 4px;
     margin-bottom: 16px;
@@ -240,6 +281,33 @@ button[type="submit"]:hover {
 
 #backButton:hover {
     background: #1d4ed8;
+}
+
+.progress-message {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.progress-message.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.progress-message.encouraging {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.progress-message.neutral {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.chart-summary {
+    margin: 0;
+    line-height: 1.5;
 }
 
 .chart-card {

@@ -16,6 +16,27 @@ function formatDate(iso) {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 }
 
+function getProgressMessage(entries) {
+    if (entries.length < 2) {
+        return "";
+    }
+
+    const previous = entries[entries.length - 2];
+    const latest = entries[entries.length - 1];
+    const difference = latest.total - previous.total;
+    const absDifference = Math.abs(difference);
+
+    if (difference > 0) {
+        return `<div class="progress-message success">Great job! You went up <strong>${absDifference} lbs</strong> from your last workout.</div>`;
+    }
+
+    if (difference < 0) {
+        return `<div class="progress-message encouraging">Nice work — you were down <strong>${absDifference} lbs</strong> from your last workout. Looks like it was a high gravity day.</div>`;
+    }
+
+    return `<div class="progress-message neutral">You stayed the same as your last workout. Consistency still counts.</div>`;
+}
+
 function drawChart(entries) {
     const ctx = canvas.getContext("2d");
     const width = canvas.width;
@@ -105,7 +126,8 @@ if (!exercise) {
         drawChart(sortedWorkouts);
         const last = sortedWorkouts[sortedWorkouts.length - 1];
         const details = workoutSummary(last);
-        chartDetails.innerHTML = `Showing ${sortedWorkouts.length} recorded workout(s) for <strong>${exercise}</strong>.<br>Latest total: ${last.total} lbs (${details}).`;
+        const progressMessage = getProgressMessage(sortedWorkouts);
+        chartDetails.innerHTML = `${progressMessage}<p class="chart-summary">Showing ${sortedWorkouts.length} recorded workout(s) for <strong>${exercise}</strong>.<br>Latest total: ${last.total} lbs (${details}).</p>`;
     }
 }
 
