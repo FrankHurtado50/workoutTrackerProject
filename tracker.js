@@ -15,6 +15,9 @@ const queryParams = new URLSearchParams(window.location.search);
 const mode = queryParams.get("mode");
 const templateWorkout = queryParams.get("template");
 
+const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
+
 if (mode === "previous") {
     const heading = document.querySelector("h2");
     if (heading) {
@@ -105,15 +108,44 @@ function updateVariableSetFields() {
     renderVariableSetFields(sets);
 }
 
-const STORAGE_KEY = "workoutTrackerWorkouts";
+function getAuthStorage() {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
+}
+
+function getCurrentUserEmail() {
+    const auth = getAuthStorage();
+    return auth.currentUser ? auth.currentUser.email : null;
+}
 
 function getStoredWorkouts() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const auth = getAuthStorage();
+    const currentUserEmail = getCurrentUserEmail();
+
+    if (currentUserEmail && auth.users[currentUserEmail]) {
+        return auth.users[currentUserEmail].workouts || [];
+    }
+
+    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
 }
 
 function saveWorkouts(workouts) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+    const auth = getAuthStorage();
+    const currentUserEmail = getCurrentUserEmail();
+
+    if (currentUserEmail) {
+        if (!auth.users[currentUserEmail]) {
+            auth.users[currentUserEmail] = { workouts: [] };
+        }
+
+        auth.users[currentUserEmail].workouts = workouts;
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
+        return;
+    }
+
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
 }
 
 function renderWorkoutButton(workout) {
@@ -305,7 +337,3 @@ form.addEventListener("submit", function(event) {
     params.set("sets", sets);
     window.location.href = `compare.html?exercise=${encodeURIComponent(exercise)}`;
 });
-
-
-
-

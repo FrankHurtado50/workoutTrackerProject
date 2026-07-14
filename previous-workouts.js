@@ -1,9 +1,27 @@
 const previousWorkoutList = document.getElementById("previousWorkoutList");
 
-const STORAGE_KEY = "workoutTrackerWorkouts";
+const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
+
+function getAuthStorage() {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
+}
+
+function getCurrentUserEmail() {
+    const auth = getAuthStorage();
+    return auth.currentUser ? auth.currentUser.email : null;
+}
 
 function getStoredWorkouts() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const auth = getAuthStorage();
+    const currentUserEmail = getCurrentUserEmail();
+
+    if (currentUserEmail && auth.users[currentUserEmail]) {
+        return auth.users[currentUserEmail].workouts || [];
+    }
+
+    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
 }
 
