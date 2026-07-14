@@ -10,6 +10,11 @@ function getCurrentUserEmail() {
     return auth.currentUser ? auth.currentUser.email : null;
 }
 
+function getCurrentUserFirstName() {
+    const auth = getAuthStorage();
+    return auth.currentUser ? auth.currentUser.firstName : null;
+}
+
 function isLoggedIn() {
     return Boolean(getCurrentUserEmail());
 }
@@ -35,10 +40,23 @@ function updateAuthHeader() {
             handleLogout();
         }, { once: true });
     } else {
-        authLink.textContent = "Log In";
+        authLink.textContent = "Log In/Sign Up";
         authLink.setAttribute("href", "login.html");
         authLink.onclick = null;
     }
 }
 
-window.addEventListener("DOMContentLoaded", updateAuthHeader);
+function updateWelcomeHeading() {
+    const welcomeHeading = document.getElementById("welcomeHeading");
+    if (!welcomeHeading) {
+        return;
+    }
+
+    const firstName = getCurrentUserFirstName();
+    welcomeHeading.textContent = firstName ? `Welcome ${firstName}` : "Welcome!";
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    updateAuthHeader();
+    updateWelcomeHeading();
+});

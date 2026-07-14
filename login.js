@@ -1,7 +1,12 @@
 const loginForm = document.getElementById("loginForm");
+const signupForm = document.getElementById("signupForm");
 const loginMessage = document.getElementById("loginMessage");
-const usernameInput = document.getElementById("username");
-const passwordInput = document.getElementById("password");
+const loginEmailInput = document.getElementById("loginEmail");
+const loginPasswordInput = document.getElementById("loginPassword");
+const signupEmailInput = document.getElementById("signupEmail");
+const signupFirstNameInput = document.getElementById("signupFirstName");
+const signupPasswordInput = document.getElementById("signupPassword");
+const signupConfirmPasswordInput = document.getElementById("signupConfirmPassword");
 
 const AUTH_STORAGE_KEY = "workoutTrackerAuth";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
@@ -34,8 +39,8 @@ function getSavedAccount() {
     return auth.currentUser ? auth.currentUser : null;
 }
 
-function redirectToTracker() {
-    window.location.href = "tracker.html";
+function redirectToWelcome() {
+    window.location.href = "welcome.html";
 }
 
 function populateSavedCredentials() {
@@ -44,10 +49,14 @@ function populateSavedCredentials() {
         return;
     }
 
-    usernameInput.value = savedAccount.email || "";
-    passwordInput.value = savedAccount.password || "";
+    loginEmailInput.value = savedAccount.email || "";
+    signupEmailInput.value = savedAccount.email || "";
+    signupFirstNameInput.value = savedAccount.firstName || "";
+    loginPasswordInput.value = "";
+    signupPasswordInput.value = "";
+    signupConfirmPasswordInput.value = "";
     setMessage("Welcome back! Redirecting to your tracker.", "#166534");
-    window.setTimeout(redirectToTracker, 800);
+    window.setTimeout(redirectToWelcome, 800);
 }
 
 function saveLogin(email, password) {
@@ -56,71 +65,146 @@ function saveLogin(email, password) {
     const existingUser = auth.users[normalizedEmail];
     const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
 
-    if (existingUser && existingUser.password !== password) {
-        return { success: false, message: "That password does not match this account." };
-    }
-
     if (!existingUser) {
-        auth.users[normalizedEmail] = { password, workouts: [] };
-    } else {
-        auth.users[normalizedEmail].password = password;
+        return { success: false, message: "invalid Credentails" };
     }
 
-    if (!auth.users[normalizedEmail].workouts?.length && legacyWorkouts.length) {
-        auth.users[normalizedEmail].workouts = legacyWorkouts;
+    if (existingUser.password !== password) {
+        return { success: false, message: "invalid Credentails" };
     }
 
-    auth.currentUser = { email: normalizedEmail, password };
+    if (!existingUser.workouts?.length && legacyWorkouts.length) {
+        existingUser.workouts = legacyWorkouts;
+    }
+
+    auth.currentUser = {
+        email: normalizedEmail,
+        password,
+        firstName: existingUser.firstName || ""
+    };
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(auth.users[normalizedEmail].workouts || []));
-    return { success: true, email: normalizedEmail };
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(existingUser.workouts || []));
+    return { success: true, email: normalizedEmail, firstName: existingUser.firstName || "" };
 }
 
-usernameInput.addEventListener("input", () => {
-    usernameInput.style.borderColor = "#cbd5e1";
-    if (loginMessage.textContent) {
-        loginMessage.textContent = "";
-    }
-});
+function signUp(email, password, firstName) {
+    const normalizedEmail = normalizeEmail(email);
+    const auth = getAuthStorage();
+    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
 
-passwordInput.addEventListener("input", () => {
-    passwordInput.style.borderColor = "#cbd5e1";
+    if (auth.users[normalizedEmail]) {
+        return { success: false, message: "This email is already signed up." };
+    }
+
+    auth.users[normalizedEmail] = {
+        firstName,
+        password,
+        workouts: legacyWorkouts.length ? legacyWorkouts : []
+    };
+
+    auth.currentUser = {
+        email: normalizedEmail,
+        password,
+        firstName
+    };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(auth.users[normalizedEmail].workouts || []));
+    return { success: true, email: normalizedEmail, firstName };
+}
+
+function clearMessage() {
     if (loginMessage.textContent) {
         loginMessage.textContent = "";
     }
+}
+
+[loginEmailInput, loginPasswordInput, signupEmailInput, signupFirstNameInput, signupPasswordInput, signupConfirmPasswordInput].forEach((input) => {
+    input.addEventListener("input", () => {
+        input.style.borderColor = "#cbd5e1";
+        clearMessage();
+    });
 });
 
 loginForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
+    const email = loginEmailInput.value.trim();
+    const password = loginPasswordInput.value.trim();
 
-    if (!username || !password) {
+    if (!email || !password) {
         setMessage("Please enter both your email and password.", "#b91c1c");
-        usernameInput.style.borderColor = "#b91c1c";
-        passwordInput.style.borderColor = "#b91c1c";
+        loginEmailInput.style.borderColor = "#b91c1c";
+        loginPasswordInput.style.borderColor = "#b91c1c";
         return;
     }
 
-    if (!isValidEmail(username)) {
+    if (!isValidEmail(email)) {
         setMessage("Please enter a valid email ending in .com.", "#b91c1c");
-        usernameInput.style.borderColor = "#b91c1c";
-        passwordInput.style.borderColor = "#cbd5e1";
+        loginEmailInput.style.borderColor = "#b91c1c";
+        loginPasswordInput.style.borderColor = "#cbd5e1";
         return;
     }
 
-    const loginResult = saveLogin(username, password);
+    const loginResult = saveLogin(email, password);
     if (!loginResult.success) {
         setMessage(loginResult.message, "#b91c1c");
-        passwordInput.style.borderColor = "#b91c1c";
+        loginPasswordInput.style.borderColor = "#b91c1c";
         return;
     }
 
-    usernameInput.style.borderColor = "#16a34a";
-    passwordInput.style.borderColor = "#16a34a";
-    setMessage(`Welcome ${loginResult.email}!`, "#166534");
-    redirectToTracker();
+    loginEmailInput.style.borderColor = "#16a34a";
+    loginPasswordInput.style.borderColor = "#16a34a";
+    setMessage(`Welcome ${loginResult.firstName || loginResult.email}!`, "#166534");
+    redirectToWelcome();
+});
+
+signupForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const email = signupEmailInput.value.trim();
+    const firstName = signupFirstNameInput.value.trim();
+    const password = signupPasswordInput.value.trim();
+    const confirmPassword = signupConfirmPasswordInput.value.trim();
+
+    if (!firstName || !email || !password || !confirmPassword) {
+        setMessage("Please fill in your first name, email, and password.", "#b91c1c");
+        signupFirstNameInput.style.borderColor = "#b91c1c";
+        signupEmailInput.style.borderColor = "#b91c1c";
+        signupPasswordInput.style.borderColor = "#b91c1c";
+        signupConfirmPasswordInput.style.borderColor = "#b91c1c";
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        setMessage("Please enter a valid email ending in .com.", "#b91c1c");
+        signupEmailInput.style.borderColor = "#b91c1c";
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        signupEmailInput.value = email;
+        signupFirstNameInput.value = firstName;
+        signupPasswordInput.value = "";
+        signupConfirmPasswordInput.value = "";
+        setMessage("passwords do not match", "#b91c1c");
+        signupPasswordInput.style.borderColor = "#b91c1c";
+        signupConfirmPasswordInput.style.borderColor = "#b91c1c";
+        return;
+    }
+
+    const signupResult = signUp(email, password, firstName);
+    if (!signupResult.success) {
+        setMessage(signupResult.message, "#b91c1c");
+        signupEmailInput.style.borderColor = "#b91c1c";
+        return;
+    }
+
+    signupEmailInput.style.borderColor = "#16a34a";
+    signupPasswordInput.style.borderColor = "#16a34a";
+    signupConfirmPasswordInput.style.borderColor = "#16a34a";
+    signupFirstNameInput.style.borderColor = "#16a34a";
+    setMessage(`Welcome ${signupResult.firstName}!`, "#166534");
+    redirectToWelcome();
 });
 
 populateSavedCredentials();

@@ -111,12 +111,25 @@ form {
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
 }
 
+.auth-forms {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
 .auth-form {
     max-width: 100%;
     margin: 0;
-    border: none;
-    box-shadow: none;
-    padding: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+    padding: 20px;
+}
+
+.auth-form h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 20px;
 }
 
 label {
@@ -207,6 +220,11 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background: #1d4ed8;
+}
+
+.auth-buttons {
+    display: grid;
+    gap: 12px;
 }
 
 .login-message {
