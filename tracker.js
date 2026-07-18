@@ -29,6 +29,40 @@ if (mode === "previous") {
     }
 }
 
+function updateVariableSetToggleButton(isEnabled) {
+    differentSetsButton.setAttribute("aria-pressed", isEnabled ? "true" : "false");
+    differentSetsButton.innerHTML = isEnabled
+        ? '<span class="toggle-box" aria-hidden="true"></span><span>Use same weight/reps for every set</span>'
+        : '<span class="toggle-box" aria-hidden="true"></span><span>Different weights/reps for each set?</span>';
+}
+
+function setVariableSetMode(enabled, setCount = Number(setsInput.value)) {
+    variableSets = Boolean(enabled);
+    variableSetFields.classList.toggle("hidden", !variableSets);
+    uniformFields.classList.toggle("hidden", variableSets);
+
+    if (variableSets) {
+        const currentSets = Number.isFinite(setCount) && setCount > 0 ? setCount : 1;
+        setsInput.value = currentSets;
+        renderVariableSetFields(currentSets);
+    } else {
+        variableSetFields.innerHTML = "";
+    }
+
+    updateVariableSetToggleButton(variableSets);
+}
+
+function toggleVariableSetMode() {
+    if (variableSets) {
+        setVariableSetMode(false);
+    } else {
+        setVariableSetMode(true, Number(setsInput.value));
+    }
+}
+
+window.toggleVariableSetMode = toggleVariableSetMode;
+window.updateVariableSetFields = updateVariableSetFields;
+
 function applyTemplateWorkout(workout) {
     if (!workout) {
         return;
@@ -37,13 +71,7 @@ function applyTemplateWorkout(workout) {
     exerciseInput.value = workout.exercise;
 
     if (workout.variableSets && Array.isArray(workout.setDetails)) {
-        variableSets = true;
-        setsInput.value = workout.sets;
-        uniformFields.classList.add("hidden");
-        variableSetFields.classList.remove("hidden");
-        differentSetsButton.setAttribute("aria-pressed", "true");
-        differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Use same weight/reps for every set</span>';
-        renderVariableSetFields(workout.sets);
+        setVariableSetMode(true, workout.sets);
 
         workout.setDetails.forEach((set, index) => {
             const repsInputForSet = variableSetFields.querySelector(`#reps${index + 1}`);
@@ -52,15 +80,10 @@ function applyTemplateWorkout(workout) {
             if (weightInputForSet) weightInputForSet.value = set.weight;
         });
     } else {
-        variableSets = false;
+        setVariableSetMode(false);
         setsInput.value = workout.sets;
         repsInput.value = workout.reps;
         weightInput.value = workout.weight;
-        uniformFields.classList.remove("hidden");
-        variableSetFields.classList.add("hidden");
-        variableSetFields.innerHTML = "";
-        differentSetsButton.setAttribute("aria-pressed", "false");
-        differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Different weights/reps for each set?</span>';
     }
 }
 
@@ -96,7 +119,7 @@ function getVariableSetInputs() {
 }
 
 function updateVariableSetFields() {
-    if (!variableSets) {
+    if (variableSetFields.classList.contains("hidden")) {
         return;
     }
 
@@ -159,13 +182,7 @@ function renderWorkoutButton(workout) {
         exerciseInput.value = workout.exercise;
 
         if (workout.variableSets && Array.isArray(workout.setDetails)) {
-            variableSets = true;
-            setsInput.value = workout.sets;
-            uniformFields.classList.add("hidden");
-            variableSetFields.classList.remove("hidden");
-            differentSetsButton.setAttribute("aria-pressed", "true");
-            differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Use same weight/reps for every set</span>';
-            renderVariableSetFields(workout.sets);
+            setVariableSetMode(true, workout.sets);
 
             workout.setDetails.forEach((set, index) => {
                 const repsInputForSet = variableSetFields.querySelector(`#reps${index + 1}`);
@@ -174,15 +191,10 @@ function renderWorkoutButton(workout) {
                 if (weightInputForSet) weightInputForSet.value = set.weight;
             });
         } else {
-            variableSets = false;
+            setVariableSetMode(false);
             setsInput.value = workout.sets;
             repsInput.value = workout.reps;
             weightInput.value = workout.weight;
-            uniformFields.classList.remove("hidden");
-            variableSetFields.classList.add("hidden");
-            variableSetFields.innerHTML = "";
-            differentSetsButton.setAttribute("aria-pressed", "false");
-            differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Different weights/reps for each set?</span>';
         }
 
         exerciseInput.focus();
@@ -214,126 +226,118 @@ function renderWorkouts() {
     latestWorkouts.forEach(renderWorkoutButton);
 }
 
-renderWorkouts();
+function initializeTracker() {
+    renderWorkouts();
 
-if (mode === "previous" && templateWorkout) {
-    try {
-        const workout = JSON.parse(templateWorkout);
-        applyTemplateWorkout(workout);
-    } catch (error) {
-        console.error("Unable to load workout template", error);
-    }
-}
-
-differentSetsButton.addEventListener("click", () => {
-    variableSets = !variableSets;
-    variableSetFields.classList.toggle("hidden", !variableSets);
-    uniformFields.classList.toggle("hidden", variableSets);
-
-    if (variableSets) {
-        const currentSets = Number(setsInput.value) > 0 ? Number(setsInput.value) : 3;
-        setsInput.value = currentSets;
-        renderVariableSetFields(currentSets);
-        differentSetsButton.setAttribute("aria-pressed", "true");
-        differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Use same weight/reps for every set</span>';
-    } else {
-        variableSetFields.innerHTML = "";
-        differentSetsButton.setAttribute("aria-pressed", "false");
-        differentSetsButton.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Different weights/reps for each set?</span>';
-    }
-});
-
-setsInput.addEventListener("input", () => {
-    if (variableSets) {
-        updateVariableSetFields();
-    }
-});
-
-form.addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const exercise = exerciseInput.value.trim();
-    const sets = Number(setsInput.value);
-
-    if (!exercise || sets <= 0) {
-        alert("Please enter a valid exercise and set count.");
-        return;
+    if (mode === "previous" && templateWorkout) {
+        try {
+            const workout = JSON.parse(templateWorkout);
+            applyTemplateWorkout(workout);
+        } catch (error) {
+            console.error("Unable to load workout template", error);
+        }
     }
 
-    let totalWeight;
-    let workout;
-    let params = new URLSearchParams({ exercise, total: 0, sets });
+    setsInput.addEventListener("input", () => {
+        if (!variableSetFields.classList.contains("hidden")) {
+            updateVariableSetFields();
+        }
+    });
 
-    if (variableSets) {
-        const setInputs = getVariableSetInputs();
-        const setDetails = [];
-        let sumTotal = 0;
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
 
-        if (setInputs.length !== sets) {
-            alert("Please enter the same number of variable set rows as the number of sets.");
+        const exercise = exerciseInput.value.trim();
+        const sets = Number(setsInput.value);
+
+        if (!exercise || sets <= 0) {
+            alert("Please enter a valid exercise and set count.");
             return;
         }
 
-        setInputs.forEach((inputPair, index) => {
-            const setReps = Number(inputPair.reps.value);
-            const setWeight = Number(inputPair.weight.value);
+        variableSets = !variableSetFields.classList.contains("hidden");
 
-            if (setReps <= 0 || setWeight <= 0) {
-                alert("Please enter valid reps and weight for each set.");
+        let totalWeight;
+        let workout;
+        let params = new URLSearchParams({ exercise, total: 0, sets });
+
+        if (variableSets) {
+            const setInputs = getVariableSetInputs();
+            const setDetails = [];
+            let sumTotal = 0;
+
+            if (setInputs.length !== sets) {
+                alert("Please enter the same number of variable set rows as the number of sets.");
                 return;
             }
 
-            setDetails.push({ reps: setReps, weight: setWeight });
-            sumTotal += setReps * setWeight;
-            params.set(`reps${index + 1}`, setReps);
-            params.set(`weight${index + 1}`, setWeight);
-        });
+            setInputs.forEach((inputPair, index) => {
+                const setReps = Number(inputPair.reps.value);
+                const setWeight = Number(inputPair.weight.value);
 
-        if (setDetails.length !== sets) {
-            return;
+                if (setReps <= 0 || setWeight <= 0) {
+                    alert("Please enter valid reps and weight for each set.");
+                    return;
+                }
+
+                setDetails.push({ reps: setReps, weight: setWeight });
+                sumTotal += setReps * setWeight;
+                params.set(`reps${index + 1}`, setReps);
+                params.set(`weight${index + 1}`, setWeight);
+            });
+
+            if (setDetails.length !== sets) {
+                return;
+            }
+
+            totalWeight = sumTotal;
+            workout = {
+                exercise,
+                sets,
+                variableSets: true,
+                setDetails,
+                total: totalWeight,
+                recordedAt: new Date().toISOString()
+            };
+
+            params.set("variableSets", "true");
+        } else {
+            const reps = Number(repsInput.value);
+            const weight = Number(weightInput.value);
+
+            if (reps <= 0 || weight <= 0) {
+                alert("Please enter valid reps and weight.");
+                return;
+            }
+
+            totalWeight = reps * weight * sets;
+            workout = {
+                exercise,
+                reps,
+                weight,
+                sets,
+                total: totalWeight,
+                recordedAt: new Date().toISOString()
+            };
+
+            params.set("reps", reps);
+            params.set("weight", weight);
+            params.set("variableSets", "false");
         }
 
-        totalWeight = sumTotal;
-        workout = {
-            exercise,
-            sets,
-            variableSets: true,
-            setDetails,
-            total: totalWeight,
-            recordedAt: new Date().toISOString()
-        };
+        const workouts = getStoredWorkouts();
+        workouts.push(workout);
+        saveWorkouts(workouts);
+        renderWorkouts();
 
-        params.set("variableSets", "true");
-    } else {
-        const reps = Number(repsInput.value);
-        const weight = Number(weightInput.value);
+        params.set("total", totalWeight);
+        params.set("sets", sets);
+        window.location.href = `compare.html?exercise=${encodeURIComponent(exercise)}`;
+    });
+}
 
-        if (reps <= 0 || weight <= 0) {
-            alert("Please enter valid reps and weight.");
-            return;
-        }
-
-        totalWeight = reps * weight * sets;
-        workout = {
-            exercise,
-            reps,
-            weight,
-            sets,
-            total: totalWeight,
-            recordedAt: new Date().toISOString()
-        };
-
-        params.set("reps", reps);
-        params.set("weight", weight);
-        params.set("variableSets", "false");
-    }
-
-    const workouts = getStoredWorkouts();
-    workouts.push(workout);
-    saveWorkouts(workouts);
-    renderWorkouts();
-
-    params.set("total", totalWeight);
-    params.set("sets", sets);
-    window.location.href = `compare.html?exercise=${encodeURIComponent(exercise)}`;
-});
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeTracker);
+} else {
+    initializeTracker();
+}

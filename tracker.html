@@ -44,7 +44,69 @@
     <p class="subtext">Click a saved workout to prefill the form and then submit a new entry to compare it to your history.</p>
     <div id="workoutList"></div>
 
-    <script src="auth-header.js"></script>
-    <script src="tracker.js"></script>
+    <script src="auth-header.js?v=20260718"></script>
+    <script src="tracker.js?v=20260718"></script>
+    <script>
+        (function () {
+            const button = document.getElementById("differentSetsButton");
+            const setsInput = document.getElementById("sets");
+            const variableSetFields = document.getElementById("variableSetFields");
+            const uniformFields = document.querySelector(".uniform-fields");
+
+            if (!button || !setsInput || !variableSetFields || !uniformFields) {
+                return;
+            }
+
+            function renderVariableSetRows(setCount) {
+                const count = Math.max(1, Math.min(12, Number(setCount) || 1));
+                variableSetFields.innerHTML = "";
+
+                for (let i = 1; i <= count; i += 1) {
+                    const row = document.createElement("div");
+                    row.className = "set-group";
+                    row.innerHTML = `
+                        <div>
+                            <label for="reps${i}">Reps for set ${i}</label>
+                            <input type="number" id="reps${i}" min="1" class="set-reps">
+                        </div>
+                        <div>
+                            <label for="weight${i}">Weight for set ${i}</label>
+                            <input type="number" id="weight${i}" min="1" class="set-weight">
+                        </div>
+                    `;
+                    variableSetFields.appendChild(row);
+                }
+            }
+
+            function setVariableSetMode(enabled) {
+                const isEnabled = Boolean(enabled);
+                button.setAttribute("aria-pressed", isEnabled ? "true" : "false");
+                variableSetFields.classList.toggle("hidden", !isEnabled);
+                uniformFields.classList.toggle("hidden", isEnabled);
+
+                if (isEnabled) {
+                    renderVariableSetRows(setsInput.value);
+                    button.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Use same weight/reps for every set</span>';
+                } else {
+                    variableSetFields.innerHTML = "";
+                    button.innerHTML = '<span class="toggle-box" aria-hidden="true"></span><span>Different weights/reps for each set?</span>';
+                }
+            }
+
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                const isEnabled = button.getAttribute("aria-pressed") === "true";
+                setVariableSetMode(!isEnabled);
+            });
+
+            setsInput.addEventListener("input", function () {
+                if (button.getAttribute("aria-pressed") === "true") {
+                    renderVariableSetRows(setsInput.value);
+                }
+            });
+
+            setVariableSetMode(false);
+        })();
+    </script>
 </body>
 </html>
