@@ -1,7 +1,7 @@
-const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const HEADER_AUTH_STORAGE_KEY = "workoutTrackerAuth";
 
 function getAuthStorage() {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    const raw = localStorage.getItem(HEADER_AUTH_STORAGE_KEY);
     return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
 }
 
@@ -22,7 +22,7 @@ function isLoggedIn() {
 function handleLogout() {
     const auth = getAuthStorage();
     auth.currentUser = null;
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    localStorage.setItem(HEADER_AUTH_STORAGE_KEY, JSON.stringify(auth));
     window.location.href = "login.html";
 }
 

@@ -136,17 +136,47 @@ function getAuthStorage() {
     return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
 }
 
+function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase();
+}
+
 function getCurrentUserEmail() {
     const auth = getAuthStorage();
-    return auth.currentUser ? auth.currentUser.email : null;
+    return auth.currentUser ? normalizeEmail(auth.currentUser.email) : null;
+}
+
+function getUserStorageKey(auth, email) {
+    const normalized = normalizeEmail(email);
+    if (normalized in auth.users) {
+        return normalized;
+    }
+    return Object.keys(auth.users).find((key) => normalizeEmail(key) === normalized) || normalized;
+}
+
+function ensureUserWorkoutRecord(auth, currentUserEmail) {
+    const userKey = getUserStorageKey(auth, currentUserEmail);
+    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
+
+    if (!auth.users[userKey]) {
+        auth.users[userKey] = { workouts: legacyWorkouts };
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+        return;
+    }
+
+    if (!Array.isArray(auth.users[userKey].workouts)) {
+        auth.users[userKey].workouts = legacyWorkouts;
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    }
 }
 
 function getStoredWorkouts() {
     const auth = getAuthStorage();
     const currentUserEmail = getCurrentUserEmail();
 
-    if (currentUserEmail && auth.users[currentUserEmail]) {
-        return auth.users[currentUserEmail].workouts || [];
+    if (currentUserEmail) {
+        const userKey = getUserStorageKey(auth, currentUserEmail);
+        ensureUserWorkoutRecord(auth, userKey);
+        return auth.users[userKey].workouts || [];
     }
 
     const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -158,11 +188,9 @@ function saveWorkouts(workouts) {
     const currentUserEmail = getCurrentUserEmail();
 
     if (currentUserEmail) {
-        if (!auth.users[currentUserEmail]) {
-            auth.users[currentUserEmail] = { workouts: [] };
-        }
-
-        auth.users[currentUserEmail].workouts = workouts;
+        const userKey = getUserStorageKey(auth, currentUserEmail);
+        ensureUserWorkoutRecord(auth, userKey);
+        auth.users[userKey].workouts = workouts;
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
         localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
         return;

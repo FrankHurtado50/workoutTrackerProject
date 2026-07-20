@@ -17,12 +17,45 @@ function getCurrentUserEmail() {
     return auth.currentUser ? auth.currentUser.email : null;
 }
 
+function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase();
+}
+
+function getUserStorageKey(auth, email) {
+    const normalizedEmail = normalizeEmail(email);
+
+    if (normalizedEmail in auth.users) {
+        return normalizedEmail;
+    }
+
+    return Object.keys(auth.users).find((key) => normalizeEmail(key) === normalizedEmail) || normalizedEmail;
+}
+
+function ensureUserWorkoutRecord(auth, currentUserEmail) {
+    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
+
+    if (!auth.users[currentUserEmail]) {
+        auth.users[currentUserEmail] = {
+            workouts: legacyWorkouts
+        };
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+        return;
+    }
+
+    if (!Array.isArray(auth.users[currentUserEmail].workouts)) {
+        auth.users[currentUserEmail].workouts = legacyWorkouts;
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    }
+}
+
 function getStoredWorkouts() {
     const auth = getAuthStorage();
     const currentUserEmail = getCurrentUserEmail();
 
-    if (currentUserEmail && auth.users[currentUserEmail]) {
-        return auth.users[currentUserEmail].workouts || [];
+    if (currentUserEmail) {
+        const userKey = getUserStorageKey(auth, currentUserEmail);
+        ensureUserWorkoutRecord(auth, userKey);
+        return auth.users[userKey].workouts || [];
     }
 
     const raw = localStorage.getItem(LEGACY_STORAGE_KEY);

@@ -59,11 +59,21 @@ function populateSavedCredentials() {
     window.setTimeout(redirectToWelcome, 800);
 }
 
+function getExistingUser(auth, email) {
+    const normalizedEmail = normalizeEmail(email);
+    if (normalizedEmail in auth.users) {
+        return { key: normalizedEmail, user: auth.users[normalizedEmail] };
+    }
+
+    const existingKey = Object.keys(auth.users).find((key) => normalizeEmail(key) === normalizedEmail);
+    return existingKey ? { key: existingKey, user: auth.users[existingKey] } : { key: normalizedEmail, user: undefined };
+}
+
 function saveLogin(email, password) {
     const normalizedEmail = normalizeEmail(email);
     const auth = getAuthStorage();
-    const existingUser = auth.users[normalizedEmail];
     const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
+    const { key, user: existingUser } = getExistingUser(auth, email);
 
     if (!existingUser) {
         return { success: false, message: "invalid Credentails" };
@@ -73,10 +83,15 @@ function saveLogin(email, password) {
         return { success: false, message: "invalid Credentails" };
     }
 
-    if (!existingUser.workouts?.length && legacyWorkouts.length) {
+    if (!Array.isArray(existingUser.workouts)) {
         existingUser.workouts = legacyWorkouts;
     }
 
+    if (!existingUser.workouts.length && legacyWorkouts.length) {
+        existingUser.workouts = legacyWorkouts;
+    }
+
+    auth.users[key] = existingUser;
     auth.currentUser = {
         email: normalizedEmail,
         password,
@@ -92,14 +107,14 @@ function signUp(email, password, firstName) {
     const auth = getAuthStorage();
     const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
 
-    if (auth.users[normalizedEmail]) {
+    if (Object.keys(auth.users).some((key) => normalizeEmail(key) === normalizedEmail)) {
         return { success: false, message: "This email is already signed up." };
     }
 
     auth.users[normalizedEmail] = {
         firstName,
         password,
-        workouts: legacyWorkouts.length ? legacyWorkouts : []
+        workouts: Array.isArray(legacyWorkouts) ? legacyWorkouts : []
     };
 
     auth.currentUser = {
@@ -108,7 +123,7 @@ function signUp(email, password, firstName) {
         firstName
     };
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(auth.users[normalizedEmail].workouts || []));
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(auth.users[normalizedEmail].workouts));
     return { success: true, email: normalizedEmail, firstName };
 }
 
