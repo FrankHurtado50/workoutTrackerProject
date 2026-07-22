@@ -12,6 +12,22 @@
     </div>
     <div class="chart-card">
         <h1 id="compareTitle">Workout history</h1>
+        <div class="chart-controls" id="chartControls" hidden>
+            <label>Measure
+                <select id="metricSelect">
+                    <option value="volume">Total volume</option>
+                    <option value="weight">Maximum weight</option>
+                    <option value="reps">Total reps</option>
+                </select>
+            </label>
+            <label>Group by
+                <select id="groupSelect">
+                    <option value="workout">Each workout</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+            </label>
+        </div>
         <canvas id="historyChart" width="700" height="320"></canvas>
         <div class="chart-details" id="chartDetails"></div>
         <button id="backButton">Back to tracker</button>
