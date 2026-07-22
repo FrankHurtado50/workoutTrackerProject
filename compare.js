@@ -9,6 +9,9 @@ const backButton = document.getElementById("backButton");
 const chartControls = document.getElementById("chartControls");
 const metricSelect = document.getElementById("metricSelect");
 const groupSelect = document.getElementById("groupSelect");
+const activityGrid = document.getElementById("activityGrid");
+const activitySummary = document.getElementById("activitySummary");
+const monthLabels = document.getElementById("monthLabels");
 
 const metricOptions = {
     volume: { label: "Total volume", unit: "lbs", aggregate: "sum" },
@@ -65,6 +68,69 @@ function getExerciseNames(workouts) {
         if (name && !names.has(name.toLowerCase())) names.set(name.toLowerCase(), name);
     });
     return Array.from(names.values()).sort((a, b) => a.localeCompare(b));
+}
+
+function getLocalDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function renderActivityHeatmap(workouts) {
+    const displayedWeeks = 18;
+    const activityByDay = new Map();
+    workouts.forEach((workout) => {
+        const date = new Date(workout.recordedAt);
+        if (Number.isNaN(date.getTime())) return;
+        const key = getLocalDateKey(date);
+        activityByDay.set(key, (activityByDay.get(key) || 0) + 1);
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    const daysSinceMonday = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - daysSinceMonday - ((displayedWeeks - 1) * 7));
+    activityGrid.innerHTML = "";
+    monthLabels.innerHTML = "";
+
+    let previousMonth = -1;
+    for (let week = 0; week < displayedWeeks; week += 1) {
+        const weekStart = new Date(start);
+        weekStart.setDate(start.getDate() + (week * 7));
+        const label = document.createElement("span");
+        const month = weekStart.getMonth();
+        if (week === 0 || month !== previousMonth) {
+            label.textContent = weekStart.toLocaleDateString(undefined, { month: "short" });
+        }
+        monthLabels.appendChild(label);
+        previousMonth = month;
+    }
+
+    let activeDays = 0;
+    for (const date = new Date(start); date <= today; date.setDate(date.getDate() + 1)) {
+        const currentDate = new Date(date);
+        const count = activityByDay.get(getLocalDateKey(currentDate)) || 0;
+        if (count) activeDays += 1;
+
+        const day = document.createElement("span");
+        const level = count === 0 ? 0 : Math.min(count, 4);
+        const dateLabel = currentDate.toLocaleDateString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+        const entryLabel = `${count} workout ${count === 1 ? "entry" : "entries"}`;
+        day.className = `activity-day level-${level}`;
+        day.title = `${dateLabel}: ${entryLabel}`;
+        day.setAttribute("role", "img");
+        day.setAttribute("aria-label", `${dateLabel}: ${entryLabel}`);
+        activityGrid.appendChild(day);
+    }
+
+    activitySummary.textContent = `${activeDays} active ${activeDays === 1 ? "day" : "days"} in the last ${displayedWeeks} weeks`;
 }
 
 function renderExercisePicker(workouts) {
@@ -227,6 +293,7 @@ function renderWorkoutChart(workouts) {
 }
 
 const storedWorkouts = getStoredWorkouts();
+renderActivityHeatmap(storedWorkouts);
 
 if (!exercise) {
     renderExercisePicker(storedWorkouts);

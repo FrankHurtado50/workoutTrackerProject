@@ -7,29 +7,60 @@
     <link rel="stylesheet" href="tracker.css">
 </head>
 <body>
+    <a class="home-button" href="welcome.html">Home</a>
     <div class="page-header">
         <a class="login-button" href="login.html">Log In</a>
     </div>
     <div class="chart-card">
         <h1 id="compareTitle">Workout history</h1>
-        <div class="chart-controls" id="chartControls" hidden>
-            <label>Measure
-                <select id="metricSelect">
-                    <option value="volume">Total volume</option>
-                    <option value="weight">Maximum weight</option>
-                    <option value="reps">Total reps</option>
-                </select>
-            </label>
-            <label>Group by
-                <select id="groupSelect">
-                    <option value="workout">Each workout</option>
-                    <option value="week">Week</option>
-                    <option value="month">Month</option>
-                </select>
-            </label>
+        <div class="history-dashboard">
+            <div class="history-graph">
+                <div class="chart-controls" id="chartControls" hidden>
+                    <label>Measure
+                        <select id="metricSelect">
+                            <option value="volume">Total volume</option>
+                            <option value="weight">Maximum weight</option>
+                            <option value="reps">Total reps</option>
+                        </select>
+                    </label>
+                    <label>Group by
+                        <select id="groupSelect">
+                            <option value="workout">Each workout</option>
+                            <option value="week">Week</option>
+                            <option value="month">Month</option>
+                        </select>
+                    </label>
+                </div>
+                <canvas id="historyChart" width="700" height="320"></canvas>
+                <div class="chart-details" id="chartDetails"></div>
+            </div>
+
+            <aside class="activity-card" aria-labelledby="activityTitle">
+                <h2 id="activityTitle">Workout activity</h2>
+                <p id="activitySummary">Your last 18 weeks</p>
+                <div class="activity-chart">
+                    <div class="weekday-labels" aria-hidden="true">
+                        <span class="monday-label">Mon</span>
+                        <span class="wednesday-label">Wed</span>
+                        <span class="friday-label">Fri</span>
+                        <span class="sunday-label">Sun</span>
+                    </div>
+                    <div class="activity-calendar">
+                        <div class="month-labels" id="monthLabels" aria-hidden="true"></div>
+                        <div class="activity-grid" id="activityGrid" aria-label="Workout activity by day"></div>
+                    </div>
+                </div>
+                <div class="activity-legend" aria-hidden="true">
+                    <span>Less</span>
+                    <i class="activity-day level-0"></i>
+                    <i class="activity-day level-1"></i>
+                    <i class="activity-day level-2"></i>
+                    <i class="activity-day level-3"></i>
+                    <i class="activity-day level-4"></i>
+                    <span>More</span>
+                </div>
+            </aside>
         </div>
-        <canvas id="historyChart" width="700" height="320"></canvas>
-        <div class="chart-details" id="chartDetails"></div>
         <button id="backButton">Back to tracker</button>
     </div>
 

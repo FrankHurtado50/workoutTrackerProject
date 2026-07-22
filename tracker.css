@@ -19,7 +19,8 @@ body {
     z-index: 10;
 }
 
-.login-button {
+.login-button,
+.home-button {
     background: #2563eb;
     color: #ffffff;
     border: none;
@@ -31,8 +32,16 @@ body {
     cursor: pointer;
 }
 
-.login-button:hover {
+.login-button:hover,
+.home-button:hover {
     background: #1d4ed8;
+}
+
+.home-button {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
 }
 
 .back-link {
@@ -329,7 +338,9 @@ input.invalid {
 }
 
 .chart-card {
-    max-width: 760px;
+    width: min(1100px, calc(100vw - 48px));
+    max-width: 1100px;
+    box-sizing: border-box;
     margin: 32px auto;
     padding: 24px;
     background: #ffffff;
@@ -350,6 +361,121 @@ input.invalid {
     margin-top: 18px;
     color: #334155;
     line-height: 1.6;
+}
+
+.history-dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.history-graph {
+    min-width: 0;
+}
+
+.activity-card {
+    box-sizing: border-box;
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.activity-chart {
+    display: grid;
+    grid-template-columns: 30px 267px;
+    gap: 6px;
+}
+
+.activity-calendar {
+    min-width: 0;
+}
+
+.month-labels {
+    display: grid;
+    grid-template-columns: repeat(18, 12px);
+    gap: 3px;
+    height: 18px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.month-labels span {
+    white-space: nowrap;
+}
+
+.weekday-labels {
+    display: grid;
+    grid-template-rows: 18px repeat(7, 12px);
+    row-gap: 3px;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 12px;
+    text-align: right;
+}
+
+.weekday-labels .monday-label { grid-row: 2; }
+.weekday-labels .wednesday-label { grid-row: 4; }
+.weekday-labels .friday-label { grid-row: 6; }
+.weekday-labels .sunday-label { grid-row: 8; }
+
+.activity-card h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.activity-card p {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-flow: column;
+    grid-auto-columns: 12px;
+    gap: 3px;
+    width: 267px;
+    margin-top: 3px;
+    overflow: hidden;
+}
+
+.activity-day {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.activity-day.level-0 {
+    background: #e5e7eb;
+    border: 1px solid #d1d5db;
+}
+
+.activity-day.level-1 { background: #bfdbfe; }
+.activity-day.level-2 { background: #60a5fa; }
+.activity-day.level-3 { background: #2563eb; }
+.activity-day.level-4 { background: #1e3a8a; }
+
+.activity-legend {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    margin-top: 14px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.activity-legend span:first-child {
+    margin-right: 3px;
+}
+
+.activity-legend span:last-child {
+    margin-left: 3px;
 }
 
 .chart-controls {
@@ -381,6 +507,48 @@ input.invalid {
 @media (max-width: 560px) {
     .chart-controls {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .activity-chart {
+        grid-template-columns: 24px 214px;
+        gap: 4px;
+    }
+
+    .month-labels {
+        grid-template-columns: repeat(18, 10px);
+        gap: 2px;
+    }
+
+    .activity-grid {
+        grid-template-rows: repeat(7, 10px);
+        grid-auto-columns: 10px;
+        gap: 2px;
+        width: 214px;
+    }
+
+    .activity-day {
+        width: 10px;
+        height: 10px;
+    }
+
+    .weekday-labels {
+        grid-template-rows: 18px repeat(7, 10px);
+        row-gap: 2px;
+        font-size: 9px;
+        line-height: 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    .history-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-card {
+        width: 100%;
+        max-width: 340px;
     }
 }
 
