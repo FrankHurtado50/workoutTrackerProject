@@ -363,6 +363,17 @@ input.invalid {
     line-height: 1.6;
 }
 
+.input-help {
+    margin: -8px 0 16px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.input-help a {
+    color: #2563eb;
+}
+
 .history-dashboard {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;

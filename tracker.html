@@ -15,7 +15,12 @@
 
     <form>
         <label for="exercise">What did we do today?</label>
-        <input type="text" id="exercise">
+        <input type="text" id="exercise" list="exerciseSuggestions" autocomplete="off" placeholder="Start typing or choose an exercise">
+        <datalist id="exerciseSuggestions"></datalist>
+        <p class="input-help">
+            <span id="exerciseSuggestionStatus" aria-live="polite">Loading exercise suggestions...</span>
+            <a href="https://exercise-api.com" target="_blank" rel="noopener noreferrer">Exercise data by ExerciseAPI</a>
+        </p>
         <div></div>
         <label for="sets">How Many Sets?</label>
         <input type="number" id="sets" min="1">

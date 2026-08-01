@@ -7,6 +7,8 @@ const variableSetFields = document.getElementById("variableSetFields");
 const uniformFields = document.querySelector(".uniform-fields");
 const workoutList = document.getElementById("workoutList");
 const form = document.querySelector("form");
+const exerciseSuggestions = document.getElementById("exerciseSuggestions");
+const exerciseSuggestionStatus = document.getElementById("exerciseSuggestionStatus");
 
 let variableSets = false;
 let activeTemplateWorkout = null;
@@ -17,6 +19,99 @@ const templateWorkout = queryParams.get("template");
 
 const AUTH_STORAGE_KEY = "workoutTrackerAuth";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
+const EXERCISE_CACHE_KEY = "workoutTrackerExerciseSuggestionsV3";
+const EXERCISE_CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
+const EXERCISE_API_URL = "https://exercise-api.com/v1/exercises?tier=core&sort=preferred_rank&limit=200";
+
+function uniqueExerciseNames(names) {
+    const exercisesByName = new Map();
+    names.forEach((name) => {
+        const cleanedName = String(name || "").replace(/<[^>]*>/g, "").trim();
+        const key = cleanedName.toLowerCase();
+        if (cleanedName && !exercisesByName.has(key)) {
+            exercisesByName.set(key, cleanedName);
+        }
+    });
+    return Array.from(exercisesByName.values());
+}
+
+function rankApiExercises(exercises) {
+    return exercises
+        .filter((exercise) => exercise && exercise.name)
+        .sort((first, second) => {
+            const goldStandardDifference = Number(second.is_gold_standard) - Number(first.is_gold_standard);
+            if (goldStandardDifference) return goldStandardDifference;
+
+            const firstRank = first.preferred_rank !== null && Number.isFinite(Number(first.preferred_rank))
+                ? Number(first.preferred_rank)
+                : Number.MAX_SAFE_INTEGER;
+            const secondRank = second.preferred_rank !== null && Number.isFinite(Number(second.preferred_rank))
+                ? Number(second.preferred_rank)
+                : Number.MAX_SAFE_INTEGER;
+            if (firstRank !== secondRank) return firstRank - secondRank;
+
+            return first.name.localeCompare(second.name);
+        })
+        .map((exercise) => exercise.name);
+}
+
+function renderExerciseSuggestions(apiExercises = []) {
+    const suggestions = uniqueExerciseNames(apiExercises);
+
+    exerciseSuggestions.innerHTML = "";
+    suggestions.forEach((exerciseName) => {
+        const option = document.createElement("option");
+        option.value = exerciseName;
+        exerciseSuggestions.appendChild(option);
+    });
+
+    return suggestions.length;
+}
+
+async function loadExerciseSuggestions() {
+    let cachedExercises = [];
+    let cacheTime = 0;
+
+    try {
+        const cached = JSON.parse(localStorage.getItem(EXERCISE_CACHE_KEY) || "null");
+        if (cached && Array.isArray(cached.exercises)) {
+            cachedExercises = cached.exercises;
+            cacheTime = Number(cached.fetchedAt) || 0;
+        }
+    } catch (error) {
+        localStorage.removeItem(EXERCISE_CACHE_KEY);
+    }
+
+    const cachedSuggestionCount = renderExerciseSuggestions(cachedExercises);
+    if (cachedSuggestionCount && Date.now() - cacheTime < EXERCISE_CACHE_DURATION_MS) {
+        exerciseSuggestionStatus.textContent = `${cachedSuggestionCount} suggestions available, or type your own exercise.`;
+        return;
+    }
+
+    try {
+        const response = await fetch(EXERCISE_API_URL, { headers: { Accept: "application/json" } });
+        if (!response.ok) {
+            throw new Error(`Exercise API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        const apiExercises = uniqueExerciseNames(
+            Array.isArray(data.data) ? rankApiExercises(data.data) : []
+        );
+        const suggestionCount = renderExerciseSuggestions(apiExercises);
+        localStorage.setItem(EXERCISE_CACHE_KEY, JSON.stringify({
+            exercises: apiExercises,
+            fetchedAt: Date.now()
+        }));
+        exerciseSuggestionStatus.textContent = `${suggestionCount} suggestions available, or type your own exercise.`;
+    } catch (error) {
+        const fallbackCount = renderExerciseSuggestions(cachedExercises);
+        exerciseSuggestionStatus.textContent = fallbackCount
+            ? `${fallbackCount} saved API suggestions available, or type your own exercise.`
+            : "Exercise suggestions are unavailable, but you can still type your own exercise.";
+        console.warn("Using saved exercise suggestions because the exercise API is unavailable.", error);
+    }
+}
 
 if (mode === "previous") {
     const heading = document.querySelector("h2");
@@ -256,6 +351,7 @@ function renderWorkouts() {
 
 function initializeTracker() {
     renderWorkouts();
+    loadExerciseSuggestions();
 
     if (mode === "previous" && templateWorkout) {
         try {
