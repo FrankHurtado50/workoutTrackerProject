@@ -2,6 +2,7 @@ const exerciseInput = document.getElementById("exercise");
 const weightInput = document.getElementById("weight");
 const setsInput = document.getElementById("sets");
 const repsInput = document.getElementById("reps");
+const notesInput = document.getElementById("notes");
 const differentSetsButton = document.getElementById("differentSetsButton");
 const variableSetFields = document.getElementById("variableSetFields");
 const uniformFields = document.querySelector(".uniform-fields");
@@ -164,6 +165,7 @@ function applyTemplateWorkout(workout) {
     }
 
     exerciseInput.value = workout.exercise;
+    notesInput.value = "";
 
     if (workout.variableSets && Array.isArray(workout.setDetails)) {
         setVariableSetMode(true, workout.sets);
@@ -303,6 +305,7 @@ function renderWorkoutButton(workout) {
     button.addEventListener("click", () => {
         activeTemplateWorkout = workout;
         exerciseInput.value = workout.exercise;
+        notesInput.value = "";
 
         if (workout.variableSets && Array.isArray(workout.setDetails)) {
             setVariableSetMode(true, workout.sets);
@@ -373,6 +376,7 @@ function initializeTracker() {
 
         const exercise = exerciseInput.value.trim();
         const sets = Number(setsInput.value);
+        const notes = notesInput.value.trim();
 
         if (!exercise || sets <= 0) {
             alert("Please enter a valid exercise and set count.");
@@ -421,6 +425,7 @@ function initializeTracker() {
                 variableSets: true,
                 setDetails,
                 total: totalWeight,
+                notes,
                 recordedAt: new Date().toISOString()
             };
 
@@ -441,6 +446,7 @@ function initializeTracker() {
                 weight,
                 sets,
                 total: totalWeight,
+                notes,
                 recordedAt: new Date().toISOString()
             };
 

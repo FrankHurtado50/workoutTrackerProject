@@ -227,6 +227,15 @@ function getProgressMessage(points, metric) {
     return '<div class="progress-message neutral">You stayed the same as the previous point. Consistency still counts.</div>';
 }
 
+function escapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function drawChart(points, metric) {
     const ctx = canvas.getContext("2d");
     const width = canvas.width;
@@ -288,8 +297,13 @@ function renderWorkoutChart(workouts) {
     const points = buildChartPoints(workouts, metric, group);
     const latest = points[points.length - 1];
     const option = metricOptions[metric];
+    const latestWorkout = workouts[workouts.length - 1];
+    const latestNote = String(latestWorkout.notes || "").trim();
+    const noteSummary = latestNote
+        ? `<p class="workout-note"><strong>Latest note:</strong> ${escapeHtml(latestNote).replace(/\r?\n/g, "<br>")}</p>`
+        : "";
     drawChart(points, metric);
-    chartDetails.innerHTML = `${getProgressMessage(points, metric)}<p class="chart-summary">Showing ${points.length} ${group === "workout" ? "workout" : group} point(s) for <strong>${exercise}</strong>.<br>Latest ${option.label.toLowerCase()}: ${latest.value} ${option.unit}.</p>`;
+    chartDetails.innerHTML = `${getProgressMessage(points, metric)}<p class="chart-summary">Showing ${points.length} ${group === "workout" ? "workout" : group} point(s) for <strong>${escapeHtml(exercise)}</strong>.<br>Latest ${option.label.toLowerCase()}: ${latest.value} ${option.unit}.</p>${noteSummary}`;
 }
 
 const storedWorkouts = getStoredWorkouts();
