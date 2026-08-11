@@ -347,6 +347,11 @@ input.invalid {
     line-height: 1.5;
 }
 
+form h1 {
+    margin-top: 0;
+    font-size: 26px;
+}
+
 .chart-card {
     width: min(1100px, calc(100vw - 48px));
     max-width: 1100px;
@@ -603,3 +608,110 @@ textarea {
 .chart-card canvas[hidden] {
     display: none;
 }
+
+.chart-action-hint {
+    margin: 12px 0 0;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.chart-edit-note {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.chart-edit-note[hidden] {
+    display: none;
+}
+
+.workout-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.58);
+    box-sizing: border-box;
+}
+
+.workout-modal[hidden] {
+    display: none;
+}
+
+.workout-modal-card {
+    position: relative;
+    width: min(420px, 100%);
+    padding: 28px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+    box-sizing: border-box;
+}
+
+.workout-modal-card h2 {
+    margin: 0 32px 10px 0;
+}
+
+.workout-modal-card p {
+    margin: 0 0 20px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.modal-actions button {
+    padding: 11px 16px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.edit-workout-button {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.delete-workout-button {
+    border: none;
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.cancel-button {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #1f2937;
+}
+
+.edit-workout-button:hover { background: #1d4ed8; }
+.delete-workout-button:hover { background: #b91c1c; }
+.cancel-button:hover { background: #e2e8f0; }

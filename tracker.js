@@ -10,19 +10,33 @@ const workoutList = document.getElementById("workoutList");
 const form = document.querySelector("form");
 const exerciseSuggestions = document.getElementById("exerciseSuggestions");
 const exerciseSuggestionStatus = document.getElementById("exerciseSuggestionStatus");
+const workoutFormHeading = document.getElementById("workoutFormHeading");
+const submitWorkoutButton = form.querySelector('button[type="submit"]');
+const trackerBackLink = document.querySelector(".back-link");
+const previousWorkoutsHeading = document.querySelector("body > h2");
+const previousWorkoutsSubtext = document.querySelector("body > .subtext");
 
 let variableSets = false;
 let activeTemplateWorkout = null;
+let editingWorkout = null;
 
 const queryParams = new URLSearchParams(window.location.search);
 const mode = queryParams.get("mode");
 const templateWorkout = queryParams.get("template");
+const editWorkoutId = queryParams.get("edit");
 
 const AUTH_STORAGE_KEY = "workoutTrackerAuth";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
 const EXERCISE_CACHE_KEY = "workoutTrackerExerciseSuggestionsV3";
 const EXERCISE_CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
 const EXERCISE_API_URL = "https://exercise-api.com/v1/exercises?tier=core&sort=preferred_rank&limit=200";
+
+function createWorkoutId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+    }
+    return `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
 function uniqueExerciseNames(names) {
     const exercisesByName = new Map();
@@ -159,13 +173,13 @@ function toggleVariableSetMode() {
 window.toggleVariableSetMode = toggleVariableSetMode;
 window.updateVariableSetFields = updateVariableSetFields;
 
-function applyTemplateWorkout(workout) {
+function applyTemplateWorkout(workout, includeNotes = false) {
     if (!workout) {
         return;
     }
 
     exerciseInput.value = workout.exercise;
-    notesInput.value = "";
+    notesInput.value = includeNotes ? String(workout.notes || "") : "";
 
     if (workout.variableSets && Array.isArray(workout.setDetails)) {
         setVariableSetMode(true, workout.sets);
@@ -356,7 +370,25 @@ function initializeTracker() {
     renderWorkouts();
     loadExerciseSuggestions();
 
-    if (mode === "previous" && templateWorkout) {
+    if (editWorkoutId) {
+        editingWorkout = getStoredWorkouts().find((workout) => workout.id === editWorkoutId) || null;
+
+        if (editingWorkout) {
+            applyTemplateWorkout(editingWorkout, true);
+            workoutFormHeading.textContent = "Edit Workout";
+            submitWorkoutButton.textContent = "Save Changes";
+            document.title = "Edit Workout";
+            trackerBackLink.href = `compare.html?exercise=${encodeURIComponent(editingWorkout.exercise)}`;
+            trackerBackLink.textContent = "← Back to workout history";
+            previousWorkoutsHeading.classList.add("hidden");
+            previousWorkoutsSubtext.classList.add("hidden");
+            workoutList.classList.add("hidden");
+        } else {
+            workoutFormHeading.textContent = "Workout Not Found";
+            submitWorkoutButton.disabled = true;
+            alert("This workout could not be found. It may have already been deleted.");
+        }
+    } else if (mode === "previous" && templateWorkout) {
         try {
             const workout = JSON.parse(templateWorkout);
             applyTemplateWorkout(workout);
@@ -388,6 +420,8 @@ function initializeTracker() {
         let totalWeight;
         let workout;
         let params = new URLSearchParams({ exercise, total: 0, sets });
+        const workoutId = editingWorkout ? editingWorkout.id : createWorkoutId();
+        const recordedAt = editingWorkout ? editingWorkout.recordedAt : new Date().toISOString();
 
         if (variableSets) {
             const setInputs = getVariableSetInputs();
@@ -420,13 +454,14 @@ function initializeTracker() {
 
             totalWeight = sumTotal;
             workout = {
+                id: workoutId,
                 exercise,
                 sets,
                 variableSets: true,
                 setDetails,
                 total: totalWeight,
                 notes,
-                recordedAt: new Date().toISOString()
+                recordedAt
             };
 
             params.set("variableSets", "true");
@@ -441,13 +476,14 @@ function initializeTracker() {
 
             totalWeight = reps * weight * sets;
             workout = {
+                id: workoutId,
                 exercise,
                 reps,
                 weight,
                 sets,
                 total: totalWeight,
                 notes,
-                recordedAt: new Date().toISOString()
+                recordedAt
             };
 
             params.set("reps", reps);
@@ -456,7 +492,16 @@ function initializeTracker() {
         }
 
         const workouts = getStoredWorkouts();
-        workouts.push(workout);
+        if (editingWorkout) {
+            const workoutIndex = workouts.findIndex((storedWorkout) => storedWorkout.id === editingWorkout.id);
+            if (workoutIndex === -1) {
+                alert("This workout could not be updated because it no longer exists.");
+                return;
+            }
+            workouts[workoutIndex] = workout;
+        } else {
+            workouts.push(workout);
+        }
         saveWorkouts(workouts);
         renderWorkouts();
 

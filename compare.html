@@ -31,6 +31,7 @@
                         </select>
                     </label>
                 </div>
+                <p class="chart-edit-note" id="chartEditNote" hidden>Select a point on the chart to Edit or Delete</p>
                 <canvas id="historyChart" width="700" height="320"></canvas>
                 <div class="chart-details" id="chartDetails"></div>
             </div>
@@ -62,6 +63,28 @@
             </aside>
         </div>
         <button id="backButton">Back to tracker</button>
+    </div>
+
+    <div class="workout-modal" id="workoutActionModal" role="dialog" aria-modal="true" aria-labelledby="workoutActionTitle" hidden>
+        <div class="workout-modal-card">
+            <button type="button" class="modal-close" id="closeWorkoutModal" aria-label="Close workout options">&times;</button>
+            <div id="workoutActions">
+                <h2 id="workoutActionTitle">Workout options</h2>
+                <p id="selectedWorkoutSummary"></p>
+                <div class="modal-actions">
+                    <button type="button" class="edit-workout-button" id="editWorkoutButton">Edit</button>
+                    <button type="button" class="delete-workout-button" id="deleteWorkoutButton">Delete</button>
+                </div>
+            </div>
+            <div id="deleteConfirmation" hidden>
+                <h2>Delete workout?</h2>
+                <p>Are you sure you would like to remove this workout?</p>
+                <div class="modal-actions">
+                    <button type="button" class="delete-workout-button" id="confirmDeleteButton">Yes, delete</button>
+                    <button type="button" class="cancel-button" id="cancelDeleteButton">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="auth-header.js"></script>

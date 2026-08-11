@@ -12,6 +12,19 @@ const groupSelect = document.getElementById("groupSelect");
 const activityGrid = document.getElementById("activityGrid");
 const activitySummary = document.getElementById("activitySummary");
 const monthLabels = document.getElementById("monthLabels");
+const workoutActionModal = document.getElementById("workoutActionModal");
+const workoutActions = document.getElementById("workoutActions");
+const deleteConfirmation = document.getElementById("deleteConfirmation");
+const selectedWorkoutSummary = document.getElementById("selectedWorkoutSummary");
+const editWorkoutButton = document.getElementById("editWorkoutButton");
+const deleteWorkoutButton = document.getElementById("deleteWorkoutButton");
+const confirmDeleteButton = document.getElementById("confirmDeleteButton");
+const cancelDeleteButton = document.getElementById("cancelDeleteButton");
+const closeWorkoutModal = document.getElementById("closeWorkoutModal");
+const chartEditNote = document.getElementById("chartEditNote");
+
+let interactiveChartPoints = [];
+let selectedWorkout = null;
 
 const metricOptions = {
     volume: { label: "Total volume", unit: "lbs", aggregate: "sum" },
@@ -22,6 +35,13 @@ const metricOptions = {
 function getAuthStorage() {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
+}
+
+function createWorkoutId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+    }
+    return `workout-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function normalizeEmail(email) {
@@ -59,6 +79,30 @@ function getStoredWorkouts() {
     }
 
     return JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
+}
+
+function saveStoredWorkouts(workouts) {
+    const auth = getAuthStorage();
+    const currentUserEmail = auth.currentUser ? auth.currentUser.email : null;
+
+    if (currentUserEmail) {
+        const userKey = ensureUserWorkoutRecord(auth, currentUserEmail);
+        auth.users[userKey].workouts = workouts;
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+    }
+
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
+}
+
+function ensureWorkoutIds(workouts) {
+    let changed = false;
+    workouts.forEach((workout) => {
+        if (!workout.id) {
+            workout.id = createWorkoutId();
+            changed = true;
+        }
+    });
+    if (changed) saveStoredWorkouts(workouts);
 }
 
 function getExerciseNames(workouts) {
@@ -192,7 +236,11 @@ function getPeriodStart(date, group) {
 
 function buildChartPoints(workouts, metric, group) {
     if (group === "workout") {
-        return workouts.map((workout) => ({ value: getWorkoutMetric(workout, metric), label: formatDate(workout.recordedAt) }));
+        return workouts.map((workout) => ({
+            value: getWorkoutMetric(workout, metric),
+            label: formatDate(workout.recordedAt),
+            workout
+        }));
     }
 
     const periods = new Map();
@@ -268,6 +316,7 @@ function drawChart(points, metric) {
         y: height - padding - (point.value / maxValue) * chartHeight,
         point
     }));
+    interactiveChartPoints = chartPoints;
 
     ctx.beginPath();
     chartPoints.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
@@ -294,6 +343,7 @@ function drawChart(points, metric) {
 function renderWorkoutChart(workouts) {
     const metric = metricSelect.value;
     const group = groupSelect.value;
+    chartEditNote.hidden = group !== "workout";
     const points = buildChartPoints(workouts, metric, group);
     const latest = points[points.length - 1];
     const option = metricOptions[metric];
@@ -302,11 +352,44 @@ function renderWorkoutChart(workouts) {
     const noteSummary = latestNote
         ? `<p class="workout-note"><strong>Latest note:</strong> ${escapeHtml(latestNote).replace(/\r?\n/g, "<br>")}</p>`
         : "";
+    const actionHint = group === "workout"
+        ? '<p class="chart-action-hint">Click a dot to edit or delete that workout.</p>'
+        : '<p class="chart-action-hint">Choose “Each workout” to edit or delete an individual entry.</p>';
     drawChart(points, metric);
-    chartDetails.innerHTML = `${getProgressMessage(points, metric)}<p class="chart-summary">Showing ${points.length} ${group === "workout" ? "workout" : group} point(s) for <strong>${escapeHtml(exercise)}</strong>.<br>Latest ${option.label.toLowerCase()}: ${latest.value} ${option.unit}.</p>${noteSummary}`;
+    chartDetails.innerHTML = `${getProgressMessage(points, metric)}<p class="chart-summary">Showing ${points.length} ${group === "workout" ? "workout" : group} point(s) for <strong>${escapeHtml(exercise)}</strong>.<br>Latest ${option.label.toLowerCase()}: ${latest.value} ${option.unit}.</p>${noteSummary}${actionHint}`;
+}
+
+function findWorkoutAtCanvasPosition(event) {
+    const bounds = canvas.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) * (canvas.width / bounds.width);
+    const y = (event.clientY - bounds.top) * (canvas.height / bounds.height);
+
+    const match = interactiveChartPoints.find((chartPoint) => {
+        if (!chartPoint.point.workout) return false;
+        return Math.hypot(chartPoint.x - x, chartPoint.y - y) <= 14;
+    });
+
+    return match ? match.point.workout : null;
+}
+
+function closeActionModal() {
+    workoutActionModal.hidden = true;
+    workoutActions.hidden = false;
+    deleteConfirmation.hidden = true;
+    selectedWorkout = null;
+}
+
+function openActionModal(workout) {
+    selectedWorkout = workout;
+    selectedWorkoutSummary.textContent = `${workout.exercise} on ${formatDate(workout.recordedAt)} — ${workout.total} lbs total`;
+    workoutActions.hidden = false;
+    deleteConfirmation.hidden = true;
+    workoutActionModal.hidden = false;
+    editWorkoutButton.focus();
 }
 
 const storedWorkouts = getStoredWorkouts();
+ensureWorkoutIds(storedWorkouts);
 renderActivityHeatmap(storedWorkouts);
 
 if (!exercise) {
@@ -331,4 +414,51 @@ if (!exercise) {
 
 backButton.addEventListener("click", () => {
     window.location.href = exercise ? "compare.html" : "welcome.html";
+});
+
+canvas.addEventListener("click", (event) => {
+    const workout = findWorkoutAtCanvasPosition(event);
+    if (workout) openActionModal(workout);
+});
+
+canvas.addEventListener("mousemove", (event) => {
+    canvas.style.cursor = findWorkoutAtCanvasPosition(event) ? "pointer" : "default";
+});
+
+editWorkoutButton.addEventListener("click", () => {
+    if (selectedWorkout) {
+        window.location.href = `tracker.html?edit=${encodeURIComponent(selectedWorkout.id)}`;
+    }
+});
+
+deleteWorkoutButton.addEventListener("click", () => {
+    workoutActions.hidden = true;
+    deleteConfirmation.hidden = false;
+    confirmDeleteButton.focus();
+});
+
+cancelDeleteButton.addEventListener("click", () => {
+    deleteConfirmation.hidden = true;
+    workoutActions.hidden = false;
+    deleteWorkoutButton.focus();
+});
+
+confirmDeleteButton.addEventListener("click", () => {
+    if (!selectedWorkout) return;
+    const remainingWorkouts = getStoredWorkouts().filter((workout) => workout.id !== selectedWorkout.id);
+    const hasMoreForExercise = remainingWorkouts.some(
+        (workout) => String(workout.exercise || "").toLowerCase() === String(selectedWorkout.exercise || "").toLowerCase()
+    );
+    saveStoredWorkouts(remainingWorkouts);
+    window.location.href = hasMoreForExercise
+        ? `compare.html?exercise=${encodeURIComponent(selectedWorkout.exercise)}`
+        : "compare.html";
+});
+
+closeWorkoutModal.addEventListener("click", closeActionModal);
+workoutActionModal.addEventListener("click", (event) => {
+    if (event.target === workoutActionModal) closeActionModal();
+});
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !workoutActionModal.hidden) closeActionModal();
 });
