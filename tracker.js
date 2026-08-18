@@ -504,7 +504,7 @@ function initializeTracker() {
 
         params.set("total", totalWeight);
         params.set("sets", sets);
-        window.location.href = `compare.html?exercise=${encodeURIComponent(exercise)}`;
+        window.navigateWithTransition(`compare.html?exercise=${encodeURIComponent(exercise)}`, "forward");
     });
 }
 

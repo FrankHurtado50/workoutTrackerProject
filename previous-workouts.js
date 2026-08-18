@@ -95,7 +95,7 @@ function renderPreviousWorkouts() {
                 mode: "previous",
                 template: JSON.stringify(workout)
             });
-            window.location.href = `tracker.html?${params.toString()}`;
+            window.navigateWithTransition(`tracker.html?${params.toString()}`, "forward");
         });
 
         previousWorkoutList.appendChild(button);

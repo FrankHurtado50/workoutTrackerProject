@@ -36,5 +36,5 @@ if (exercise && total) {
 }
 
 backButton.addEventListener("click", () => {
-    window.location.href = "tracker.html";
+    window.navigateWithTransition("tracker.html", "back");
 });

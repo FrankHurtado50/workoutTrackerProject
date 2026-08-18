@@ -413,7 +413,7 @@ if (!exercise) {
 }
 
 backButton.addEventListener("click", () => {
-    window.location.href = exercise ? "compare.html" : "welcome.html";
+    window.navigateWithTransition(exercise ? "compare.html" : "welcome.html", "back");
 });
 
 canvas.addEventListener("click", (event) => {
@@ -427,7 +427,7 @@ canvas.addEventListener("mousemove", (event) => {
 
 editWorkoutButton.addEventListener("click", () => {
     if (selectedWorkout) {
-        window.location.href = `tracker.html?edit=${encodeURIComponent(selectedWorkout.id)}`;
+        window.navigateWithTransition(`tracker.html?edit=${encodeURIComponent(selectedWorkout.id)}`, "forward");
     }
 });
 
@@ -450,9 +450,12 @@ confirmDeleteButton.addEventListener("click", () => {
         (workout) => String(workout.exercise || "").toLowerCase() === String(selectedWorkout.exercise || "").toLowerCase()
     );
     saveStoredWorkouts(remainingWorkouts);
-    window.location.href = hasMoreForExercise
-        ? `compare.html?exercise=${encodeURIComponent(selectedWorkout.exercise)}`
-        : "compare.html";
+    window.navigateWithTransition(
+        hasMoreForExercise
+            ? `compare.html?exercise=${encodeURIComponent(selectedWorkout.exercise)}`
+            : "compare.html",
+        "back"
+    );
 });
 
 closeWorkoutModal.addEventListener("click", closeActionModal);

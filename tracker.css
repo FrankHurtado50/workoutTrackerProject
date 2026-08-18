@@ -1,3 +1,69 @@
+@view-transition {
+    navigation: auto;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 450ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+}
+
+:root[data-transition-direction="forward"]::view-transition-old(root) {
+    animation-name: page-slide-out-left;
+}
+
+:root[data-transition-direction="forward"]::view-transition-new(root) {
+    animation-name: page-slide-in-right;
+}
+
+:root[data-transition-direction="back"]::view-transition-old(root) {
+    animation-name: page-slide-out-right;
+}
+
+:root[data-transition-direction="back"]::view-transition-new(root) {
+    animation-name: page-slide-in-left;
+}
+
+@keyframes page-slide-out-left {
+    to {
+        opacity: 0.3;
+        transform: translateX(-8%);
+    }
+}
+
+@keyframes page-slide-in-right {
+    from {
+        opacity: 0.3;
+        transform: translateX(8%);
+    }
+}
+
+@keyframes page-slide-out-right {
+    to {
+        opacity: 0.3;
+        transform: translateX(8%);
+    }
+}
+
+@keyframes page-slide-in-left {
+    from {
+        opacity: 0.3;
+        transform: translateX(-8%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none;
+    }
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f7fb;

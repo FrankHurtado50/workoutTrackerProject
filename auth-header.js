@@ -23,7 +23,7 @@ function handleLogout() {
     const auth = getAuthStorage();
     auth.currentUser = null;
     localStorage.setItem(HEADER_AUTH_STORAGE_KEY, JSON.stringify(auth));
-    window.location.href = "login.html";
+    window.navigateWithTransition("login.html", "forward");
 }
 
 function updateAuthHeader() {

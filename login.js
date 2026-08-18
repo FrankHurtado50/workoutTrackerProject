@@ -40,7 +40,7 @@ function getSavedAccount() {
 }
 
 function redirectToWelcome() {
-    window.location.href = "welcome.html";
+    window.navigateWithTransition("welcome.html", "back");
 }
 
 function populateSavedCredentials() {
