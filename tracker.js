@@ -12,7 +12,6 @@ const exerciseSuggestions = document.getElementById("exerciseSuggestions");
 const exerciseSuggestionStatus = document.getElementById("exerciseSuggestionStatus");
 const workoutFormHeading = document.getElementById("workoutFormHeading");
 const submitWorkoutButton = form.querySelector('button[type="submit"]');
-const trackerBackLink = document.querySelector(".back-link");
 const previousWorkoutsHeading = document.querySelector("body > h2");
 const previousWorkoutsSubtext = document.querySelector("body > .subtext");
 
@@ -378,8 +377,6 @@ function initializeTracker() {
             workoutFormHeading.textContent = "Edit Workout";
             submitWorkoutButton.textContent = "Save Changes";
             document.title = "Edit Workout";
-            trackerBackLink.href = `compare.html?exercise=${encodeURIComponent(editingWorkout.exercise)}`;
-            trackerBackLink.textContent = "← Back to workout history";
             previousWorkoutsHeading.classList.add("hidden");
             previousWorkoutsSubtext.classList.add("hidden");
             workoutList.classList.add("hidden");
