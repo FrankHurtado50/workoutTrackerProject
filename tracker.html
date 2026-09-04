@@ -15,8 +15,11 @@
     <form>
         <h1 id="workoutFormHeading">Add Workout</h1>
         <label for="exercise">What did we do today?</label>
-        <input type="text" id="exercise" list="exerciseSuggestions" autocomplete="off" placeholder="Start typing or choose an exercise">
-        <datalist id="exerciseSuggestions"></datalist>
+        <div class="exercise-combobox" id="exerciseCombobox">
+            <input type="text" id="exercise" autocomplete="off" placeholder="Start typing or choose an exercise" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="exerciseSuggestions">
+            <button type="button" class="exercise-dropdown-toggle" id="exerciseDropdownToggle" aria-label="Show exercise suggestions" aria-controls="exerciseSuggestions" aria-expanded="false">&#9662;</button>
+            <div class="exercise-dropdown" id="exerciseSuggestions" role="listbox" hidden></div>
+        </div>
         <p class="input-help">
             <span id="exerciseSuggestionStatus" aria-live="polite">Loading exercise suggestions...</span>
             <a href="https://exercise-api.com" target="_blank" rel="noopener noreferrer">Exercise data by ExerciseAPI</a>
@@ -55,7 +58,7 @@
     <div id="workoutList"></div>
 
     <script src="auth-header.js?v=20260718"></script>
-    <script src="tracker.js?v=20260811"></script>
+    <script src="tracker.js?v=20260903"></script>
     <script>
         (function () {
             const button = document.getElementById("differentSetsButton");

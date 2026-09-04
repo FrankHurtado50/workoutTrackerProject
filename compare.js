@@ -6,6 +6,7 @@ const compareTitle = document.getElementById("compareTitle");
 const chartDetails = document.getElementById("chartDetails");
 const canvas = document.getElementById("historyChart");
 const backButton = document.getElementById("backButton");
+const addWorkoutButton = document.getElementById("addWorkoutButton");
 const chartControls = document.getElementById("chartControls");
 const metricSelect = document.getElementById("metricSelect");
 const groupSelect = document.getElementById("groupSelect");
@@ -406,6 +407,7 @@ if (!exercise) {
         chartDetails.innerText = "No matching workout history was found for this exercise.";
     } else {
         chartControls.hidden = false;
+        addWorkoutButton.hidden = false;
         renderWorkoutChart(workouts);
         metricSelect.addEventListener("change", () => renderWorkoutChart(workouts));
         groupSelect.addEventListener("change", () => renderWorkoutChart(workouts));
@@ -414,6 +416,15 @@ if (!exercise) {
 
 backButton.addEventListener("click", () => {
     window.navigateWithTransition(exercise ? "compare.html" : "welcome.html", "back");
+});
+
+addWorkoutButton.addEventListener("click", () => {
+    if (exercise) {
+        window.navigateWithTransition(
+            `tracker.html?mode=new&exercise=${encodeURIComponent(exercise)}`,
+            "forward"
+        );
+    }
 });
 
 canvas.addEventListener("click", (event) => {

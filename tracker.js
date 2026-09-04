@@ -9,6 +9,8 @@ const uniformFields = document.querySelector(".uniform-fields");
 const workoutList = document.getElementById("workoutList");
 const form = document.querySelector("form");
 const exerciseSuggestions = document.getElementById("exerciseSuggestions");
+const exerciseCombobox = document.getElementById("exerciseCombobox");
+const exerciseDropdownToggle = document.getElementById("exerciseDropdownToggle");
 const exerciseSuggestionStatus = document.getElementById("exerciseSuggestionStatus");
 const workoutFormHeading = document.getElementById("workoutFormHeading");
 const submitWorkoutButton = form.querySelector('button[type="submit"]');
@@ -18,11 +20,15 @@ const previousWorkoutsSubtext = document.querySelector("body > .subtext");
 let variableSets = false;
 let activeTemplateWorkout = null;
 let editingWorkout = null;
+let availableExerciseSuggestions = [];
+let visibleExerciseSuggestions = [];
+let activeExerciseSuggestionIndex = -1;
 
 const queryParams = new URLSearchParams(window.location.search);
 const mode = queryParams.get("mode");
 const templateWorkout = queryParams.get("template");
 const editWorkoutId = queryParams.get("edit");
+const prefilledExercise = queryParams.get("exercise");
 
 const AUTH_STORAGE_KEY = "workoutTrackerAuth";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
@@ -70,17 +76,142 @@ function rankApiExercises(exercises) {
 }
 
 function renderExerciseSuggestions(apiExercises = []) {
-    const suggestions = uniqueExerciseNames(apiExercises);
+    availableExerciseSuggestions = uniqueExerciseNames(apiExercises);
+
+    if (!exerciseSuggestions.hidden) {
+        renderExerciseDropdown(exerciseInput.value, false);
+    }
+
+    return availableExerciseSuggestions.length;
+}
+
+function setExerciseDropdownOpen(isOpen) {
+    exerciseSuggestions.hidden = !isOpen;
+    exerciseInput.setAttribute("aria-expanded", String(isOpen));
+    exerciseDropdownToggle.setAttribute("aria-expanded", String(isOpen));
+
+    if (!isOpen) {
+        activeExerciseSuggestionIndex = -1;
+        exerciseInput.removeAttribute("aria-activedescendant");
+    }
+}
+
+function renderExerciseDropdown(searchValue = "", showAll = false) {
+    const query = showAll ? "" : String(searchValue).trim().toLowerCase();
+    visibleExerciseSuggestions = query
+        ? availableExerciseSuggestions.filter((name) => name.toLowerCase().includes(query))
+        : availableExerciseSuggestions.slice();
 
     exerciseSuggestions.innerHTML = "";
-    suggestions.forEach((exerciseName) => {
-        const option = document.createElement("option");
-        option.value = exerciseName;
+    activeExerciseSuggestionIndex = -1;
+    exerciseInput.removeAttribute("aria-activedescendant");
+
+    if (!visibleExerciseSuggestions.length) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "exercise-dropdown-empty";
+        emptyMessage.textContent = availableExerciseSuggestions.length
+            ? "No matches. Keep typing to use your own exercise."
+            : "Exercise suggestions are still loading. You can type your own exercise.";
+        exerciseSuggestions.appendChild(emptyMessage);
+        setExerciseDropdownOpen(true);
+        return;
+    }
+
+    visibleExerciseSuggestions.forEach((exerciseName, index) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "exercise-dropdown-option";
+        option.id = `exercise-option-${index}`;
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.dataset.exerciseName = exerciseName;
+        option.textContent = exerciseName;
         exerciseSuggestions.appendChild(option);
     });
 
-    return suggestions.length;
+    setExerciseDropdownOpen(true);
 }
+
+function selectExerciseSuggestion(exerciseName) {
+    exerciseInput.value = exerciseName;
+    setExerciseDropdownOpen(false);
+    exerciseInput.focus();
+}
+
+function highlightExerciseSuggestion(index) {
+    const options = Array.from(exerciseSuggestions.querySelectorAll(".exercise-dropdown-option"));
+    if (!options.length) return;
+
+    activeExerciseSuggestionIndex = (index + options.length) % options.length;
+    options.forEach((option, optionIndex) => {
+        const isActive = optionIndex === activeExerciseSuggestionIndex;
+        option.classList.toggle("active", isActive);
+        option.setAttribute("aria-selected", String(isActive));
+    });
+
+    const activeOption = options[activeExerciseSuggestionIndex];
+    exerciseInput.setAttribute("aria-activedescendant", activeOption.id);
+    activeOption.scrollIntoView({ block: "nearest" });
+}
+
+exerciseInput.addEventListener("click", () => {
+    renderExerciseDropdown("", true);
+});
+
+exerciseInput.addEventListener("input", () => {
+    renderExerciseDropdown(exerciseInput.value, false);
+});
+
+exerciseInput.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        setExerciseDropdownOpen(false);
+        return;
+    }
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        if (exerciseSuggestions.hidden) {
+            renderExerciseDropdown(exerciseInput.value, false);
+        }
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        const nextIndex = activeExerciseSuggestionIndex === -1
+            ? (direction === 1 ? 0 : visibleExerciseSuggestions.length - 1)
+            : activeExerciseSuggestionIndex + direction;
+        highlightExerciseSuggestion(nextIndex);
+        return;
+    }
+
+    if (event.key === "Enter" && !exerciseSuggestions.hidden && activeExerciseSuggestionIndex >= 0) {
+        event.preventDefault();
+        selectExerciseSuggestion(visibleExerciseSuggestions[activeExerciseSuggestionIndex]);
+    }
+});
+
+exerciseDropdownToggle.addEventListener("click", () => {
+    if (exerciseSuggestions.hidden) {
+        renderExerciseDropdown("", true);
+        exerciseInput.focus();
+    } else {
+        setExerciseDropdownOpen(false);
+    }
+});
+
+exerciseSuggestions.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+});
+
+exerciseSuggestions.addEventListener("click", (event) => {
+    const option = event.target.closest(".exercise-dropdown-option");
+    if (option) {
+        selectExerciseSuggestion(option.dataset.exerciseName);
+    }
+});
+
+document.addEventListener("click", (event) => {
+    if (!exerciseCombobox.contains(event.target)) {
+        setExerciseDropdownOpen(false);
+    }
+});
 
 async function loadExerciseSuggestions() {
     let cachedExercises = [];
@@ -368,6 +499,10 @@ function renderWorkouts() {
 function initializeTracker() {
     renderWorkouts();
     loadExerciseSuggestions();
+
+    if (prefilledExercise && !editWorkoutId && !templateWorkout) {
+        exerciseInput.value = prefilledExercise;
+    }
 
     if (editWorkoutId) {
         editingWorkout = getStoredWorkouts().find((workout) => workout.id === editWorkoutId) || null;

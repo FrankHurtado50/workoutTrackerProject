@@ -231,6 +231,85 @@ textarea {
     box-sizing: border-box;
 }
 
+.exercise-combobox {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.exercise-combobox input {
+    margin-bottom: 0;
+    padding-right: 46px;
+}
+
+.exercise-dropdown-toggle {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 42px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-left: 1px solid #cbd5e1;
+    border-radius: 0 9px 9px 0;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.exercise-dropdown-toggle:hover,
+.exercise-dropdown-toggle[aria-expanded="true"] {
+    background: #e2e8f0;
+}
+
+.exercise-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    left: 0;
+    z-index: 30;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.exercise-dropdown[hidden] {
+    display: none;
+}
+
+.exercise-dropdown-option {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.exercise-dropdown-option:last-child {
+    border-bottom: none;
+}
+
+.exercise-dropdown-option:hover,
+.exercise-dropdown-option.active {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.exercise-dropdown-empty {
+    margin: 0;
+    padding: 12px;
+    color: #64748b;
+    font-size: 14px;
+}
+
 .hidden {
     display: none;
 }
@@ -368,7 +447,14 @@ input.invalid {
     color: #111827;
 }
 
-#backButton {
+.history-page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#backButton,
+#addWorkoutButton {
     margin-top: 24px;
     padding: 12px 18px;
     border: none;
@@ -380,8 +466,13 @@ input.invalid {
     transition: background 0.2s ease;
 }
 
-#backButton:hover {
+#backButton:hover,
+#addWorkoutButton:hover {
     background: #1d4ed8;
+}
+
+#addWorkoutButton[hidden] {
+    display: none;
 }
 
 .progress-message {
