@@ -193,6 +193,252 @@ form {
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
 }
 
+.routine-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.routine-form {
+    width: min(520px, 100%);
+    max-width: 520px;
+    box-sizing: border-box;
+}
+
+.routine-form h2 {
+    margin: 22px 0 14px;
+    font-size: 20px;
+}
+
+.routine-exercise-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    gap: 10px;
+    align-items: end;
+}
+
+.routine-exercise-field {
+    min-width: 0;
+}
+
+.remove-routine-exercise {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 16px;
+    padding: 0;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.remove-routine-exercise:hover {
+    background: #fee2e2;
+}
+
+.routine-add-button {
+    width: 100%;
+    margin: 0 0 16px;
+    padding: 11px 16px;
+    border: 1px dashed #60a5fa;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.routine-add-button span {
+    margin-right: 6px;
+    font-size: 20px;
+}
+
+.routine-add-button:hover {
+    background: #dbeafe;
+}
+
+.routine-message {
+    min-height: 20px;
+    margin: 14px 0 0;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.routine-message.success {
+    color: #166534;
+}
+
+.routine-message.error {
+    color: #b91c1c;
+}
+
+.saved-routines-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.saved-routines-card {
+    width: min(620px, 100%);
+    padding: 28px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.saved-routines-card h1 {
+    margin: 0 0 8px;
+}
+
+.saved-routines-list {
+    display: grid;
+    gap: 14px;
+    margin: 22px 0;
+}
+
+.saved-routine-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    color: #1e40af;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.saved-routine-card:hover {
+    transform: translateY(-2px);
+    background: #dbeafe;
+}
+
+.saved-routine-card h2 {
+    margin: 0;
+    color: #1e40af;
+    font-size: 20px;
+}
+
+.saved-routine-arrow {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.saved-routines-empty {
+    margin: 0;
+    padding: 22px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px dashed #94a3b8;
+    border-radius: 12px;
+}
+
+.create-routine-link {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.create-routine-link:hover {
+    background: #1d4ed8;
+}
+
+.routine-details-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.routine-details-card {
+    width: min(620px, 100%);
+    padding: 28px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.routine-details-card .back-link {
+    display: inline-block;
+}
+
+.routine-details-card h1 {
+    margin: 0 0 8px;
+}
+
+.routine-progress {
+    margin: 20px 0 12px;
+    color: #475569;
+    font-weight: 700;
+}
+
+.routine-progress.complete {
+    color: #166534;
+}
+
+.routine-checklist {
+    display: grid;
+    gap: 12px;
+}
+
+.routine-checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin: 0;
+    padding: 15px 16px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.routine-checklist-item:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.routine-checklist-item.checked {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.routine-checklist-item input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    margin: 0;
+    padding: 0;
+    accent-color: #16a34a;
+    cursor: pointer;
+}
+
+.routine-checklist-item span {
+    line-height: 1.35;
+}
+
+.routine-not-found p {
+    margin-bottom: 20px;
+}
+
 .auth-forms {
     display: grid;
     gap: 16px;

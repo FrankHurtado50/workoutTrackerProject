@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine Details</title>
+    <link rel="stylesheet" href="tracker.css">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <a class="home-button" href="welcome.html">Home</a>
+    <div class="page-header">
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="routine-details-page">
+        <section class="routine-details-card">
+            <a class="back-link" href="saved-routines.html" data-transition-direction="back">← Back to saved routines</a>
+            <div id="routineDetailsContent">
+                <h1 id="routineDetailsName">Routine</h1>
+                <p id="routineDetailsDate" class="subtext"></p>
+                <p id="routineProgress" class="routine-progress" aria-live="polite"></p>
+                <div id="routineChecklist" class="routine-checklist"></div>
+            </div>
+            <div id="routineNotFound" class="routine-not-found" hidden>
+                <h1>Routine not found</h1>
+                <p>This routine may no longer be available.</p>
+                <a class="create-routine-link" href="saved-routines.html" data-transition-direction="back">View saved routines</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="auth-header.js"></script>
+    <script src="routine-details.js?v=20260907"></script>
+</body>
+</html>

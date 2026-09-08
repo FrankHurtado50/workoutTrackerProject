@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a Routine</title>
+    <link rel="stylesheet" href="tracker.css">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <a class="home-button" href="welcome.html">Home</a>
+    <div class="page-header">
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="routine-page">
+        <form id="routineForm" class="routine-form">
+            <h1>Create a New Routine</h1>
+            <p class="subtext">Give your routine a name and add the workouts you want to include.</p>
+
+            <label for="routineName">Routine name</label>
+            <input type="text" id="routineName" maxlength="60" placeholder="Back Day" required>
+
+            <h2>Workouts</h2>
+            <div id="routineExerciseList"></div>
+
+            <button type="button" id="addRoutineExercise" class="routine-add-button">
+                <span aria-hidden="true">+</span>
+                Add another workout
+            </button>
+
+            <button type="submit" class="save-routine-button">Save Routine</button>
+            <p id="routineMessage" class="routine-message" aria-live="polite"></p>
+        </form>
+    </main>
+
+    <script src="auth-header.js"></script>
+    <script src="routine.js?v=20260907"></script>
+</body>
+</html>
