@@ -19,8 +19,12 @@
             <div id="routineDetailsContent">
                 <h1 id="routineDetailsName">Routine</h1>
                 <p id="routineDetailsDate" class="subtext"></p>
+                <p id="routineSavedMessage" class="routine-saved-message" role="status" hidden></p>
                 <p id="routineProgress" class="routine-progress" aria-live="polite"></p>
                 <div id="routineChecklist" class="routine-checklist"></div>
+                <button type="button" id="submitRoutineSelection" class="submit-routine-selection" disabled>
+                    Submit Selected Workouts
+                </button>
             </div>
             <div id="routineNotFound" class="routine-not-found" hidden>
                 <h1>Routine not found</h1>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Routine Workouts</title>
+    <link rel="stylesheet" href="tracker.css">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <a class="home-button" href="welcome.html">Home</a>
+    <div class="page-header">
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="routine-workout-entry-page">
+        <div class="routine-workout-entry-heading">
+            <a id="backToRoutine" class="back-link" href="saved-routines.html" data-transition-direction="back">← Back to routine</a>
+            <h1 id="routineEntryTitle">Enter Workout Details</h1>
+            <p class="subtext">Fill out each column, then submit them together. Every workout will be saved separately.</p>
+        </div>
+
+        <form id="routineWorkoutForm" class="routine-workout-entry-form">
+            <div id="routineWorkoutColumns" class="routine-workout-columns"></div>
+            <div id="routineEntryEmpty" class="routine-entry-empty" hidden>
+                <h2>No workouts selected</h2>
+                <p>Go back to the routine and select at least one workout.</p>
+            </div>
+            <button type="submit" id="saveRoutineWorkouts" class="save-routine-workouts">Save Workouts</button>
+            <p id="routineEntryMessage" class="routine-message" aria-live="polite"></p>
+        </form>
+    </main>
+
+    <script src="auth-header.js"></script>
+    <script src="routine-workout-entry.js?v=20260908"></script>
+</body>
+</html>

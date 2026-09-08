@@ -2,8 +2,10 @@ const routineDetailsContent = document.getElementById("routineDetailsContent");
 const routineNotFound = document.getElementById("routineNotFound");
 const routineDetailsName = document.getElementById("routineDetailsName");
 const routineDetailsDate = document.getElementById("routineDetailsDate");
+const routineSavedMessage = document.getElementById("routineSavedMessage");
 const routineProgress = document.getElementById("routineProgress");
 const routineChecklist = document.getElementById("routineChecklist");
+const submitRoutineSelection = document.getElementById("submitRoutineSelection");
 
 const ROUTINE_DETAILS_AUTH_KEY = "workoutTrackerAuth";
 const ROUTINE_DETAILS_GUEST_KEY = "workoutTrackerRoutines";
@@ -67,8 +69,12 @@ function saveRoutineProgress(storage, progress) {
 }
 
 function updateRoutineProgressText(checkedCount, totalCount) {
-    routineProgress.textContent = `${checkedCount} of ${totalCount} completed today`;
+    routineProgress.textContent = `${checkedCount} of ${totalCount} selected today`;
     routineProgress.classList.toggle("complete", totalCount > 0 && checkedCount === totalCount);
+    submitRoutineSelection.disabled = checkedCount === 0;
+    submitRoutineSelection.textContent = checkedCount === 1
+        ? "Submit 1 Selected Workout"
+        : `Submit ${checkedCount} Selected Workouts`;
 }
 
 function renderRoutineDetails() {
@@ -86,6 +92,7 @@ function renderRoutineDetails() {
     const todayKey = getLocalDateKey();
     const progressKey = `${routine.id}:${todayKey}`;
     const checkedIndexes = new Set(Array.isArray(storage.progress[progressKey]) ? storage.progress[progressKey] : []);
+    const savedCount = Number(new URLSearchParams(window.location.search).get("saved"));
 
     document.title = `${routine.name} | Routine`;
     routineDetailsName.textContent = routine.name;
@@ -95,6 +102,11 @@ function renderRoutineDetails() {
         day: "numeric"
     }).format(new Date())}`;
     routineChecklist.innerHTML = "";
+
+    if (savedCount > 0) {
+        routineSavedMessage.hidden = false;
+        routineSavedMessage.textContent = `${savedCount} ${savedCount === 1 ? "workout was" : "workouts were"} added to your history.`;
+    }
 
     exercises.forEach((exercise, index) => {
         const label = document.createElement("label");
@@ -124,6 +136,12 @@ function renderRoutineDetails() {
         label.classList.toggle("checked", checkbox.checked);
         label.append(checkbox, name);
         routineChecklist.appendChild(label);
+    });
+
+    submitRoutineSelection.addEventListener("click", () => {
+        if (!checkedIndexes.size) return;
+        const destination = new URLSearchParams({ id: routine.id, date: todayKey });
+        window.navigateWithTransition(`routine-workout-entry.html?${destination.toString()}`, "forward");
     });
 
     updateRoutineProgressText(checkedIndexes.size, exercises.length);

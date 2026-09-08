@@ -392,6 +392,16 @@ form {
     color: #166534;
 }
 
+.routine-saved-message {
+    margin: 18px 0 0;
+    padding: 12px 14px;
+    color: #166534;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
 .routine-checklist {
     display: grid;
     gap: 12px;
@@ -435,8 +445,120 @@ form {
     line-height: 1.35;
 }
 
+.submit-routine-selection {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.submit-routine-selection:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.submit-routine-selection:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
 .routine-not-found p {
     margin-bottom: 20px;
+}
+
+.routine-workout-entry-page {
+    width: min(1400px, 100%);
+}
+
+.routine-workout-entry-heading {
+    margin-bottom: 22px;
+    padding: 24px 28px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.routine-workout-entry-heading .back-link {
+    display: inline-block;
+}
+
+.routine-workout-entry-heading h1 {
+    margin: 0 0 8px;
+}
+
+.routine-workout-entry-form {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.routine-workout-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.routine-workout-column {
+    min-width: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.routine-workout-column > h2 {
+    margin: 0;
+    padding: 17px 20px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.routine-workout-column-fields {
+    padding: 20px;
+}
+
+.routine-workout-column .secondary-button {
+    width: 100%;
+}
+
+.routine-workout-column .set-group {
+    grid-template-columns: 1fr 1fr;
+}
+
+.save-routine-workouts {
+    display: block;
+    width: min(420px, 100%);
+    margin: 24px auto 0;
+}
+
+.routine-entry-empty {
+    padding: 28px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed #94a3b8;
+    border-radius: 14px;
+}
+
+.routine-entry-empty h2 {
+    margin-top: 0;
+}
+
+.routine-workout-entry-form > .routine-message {
+    text-align: center;
 }
 
 .auth-forms {
