@@ -292,7 +292,8 @@ function drawChart(points, metric) {
     const padding = 40;
     const chartHeight = height - padding * 2;
     const chartWidth = width - padding * 2;
-    const maxValue = Math.max(...points.map((point) => point.value), 1);
+    const highestValue = Math.max(...points.map((point) => point.value), 1);
+    const maxValue = points.length === 1 ? highestValue * 2 : highestValue;
     const stepX = points.length > 1 ? chartWidth / (points.length - 1) : 0;
 
     ctx.clearRect(0, 0, width, height);
@@ -313,7 +314,7 @@ function drawChart(points, metric) {
     ctx.fillText(metricOptions[metric].label, 12, 20);
 
     const chartPoints = points.map((point, index) => ({
-        x: padding + index * stepX,
+        x: points.length === 1 ? width / 2 : padding + index * stepX,
         y: height - padding - (point.value / maxValue) * chartHeight,
         point
     }));
