@@ -1126,6 +1126,29 @@ textarea {
     text-align: center;
 }
 
+.history-search-label {
+    margin-bottom: 6px;
+}
+
+.history-search-input {
+    margin-bottom: 6px;
+}
+
+.history-search-status {
+    margin: 0 0 14px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.history-search-empty {
+    margin: 0;
+    text-align: center;
+}
+
+.history-search-empty[hidden] {
+    display: none;
+}
+
 .selection-list {
     display: grid;
     gap: 12px;

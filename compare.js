@@ -183,25 +183,66 @@ function renderExercisePicker(workouts) {
     compareTitle.innerText = "View previous workout history";
     canvas.hidden = true;
     backButton.innerText = "Back to welcome";
+    chartDetails.innerHTML = "";
 
     if (!exerciseNames.length) {
         chartDetails.innerHTML = '<p class="empty-state">No workouts saved yet. Add a workout first to see its history.</p>';
         return;
     }
 
-    chartDetails.innerHTML = '<p class="chart-picker-text">Choose an exercise to compare its progress over time.</p>';
+    const pickerText = document.createElement("p");
+    pickerText.className = "chart-picker-text";
+    pickerText.textContent = "Choose an exercise to compare its progress over time.";
+
+    const searchLabel = document.createElement("label");
+    searchLabel.className = "history-search-label";
+    searchLabel.htmlFor = "historyExerciseSearch";
+    searchLabel.textContent = "Search workout history";
+
+    const searchInput = document.createElement("input");
+    searchInput.type = "search";
+    searchInput.id = "historyExerciseSearch";
+    searchInput.className = "history-search-input";
+    searchInput.placeholder = "Search exercises...";
+    searchInput.autocomplete = "off";
+
+    const searchStatus = document.createElement("p");
+    searchStatus.className = "history-search-status";
+    searchStatus.setAttribute("aria-live", "polite");
+
     const selectionList = document.createElement("div");
     selectionList.className = "selection-list";
 
-    exerciseNames.forEach((exerciseName) => {
-        const link = document.createElement("a");
-        link.className = "workout-button history-link";
-        link.href = `compare.html?exercise=${encodeURIComponent(exerciseName)}`;
-        link.textContent = exerciseName;
-        selectionList.appendChild(link);
-    });
+    const noResults = document.createElement("p");
+    noResults.className = "empty-state history-search-empty";
+    noResults.hidden = true;
 
-    chartDetails.appendChild(selectionList);
+    function renderFilteredExercises(searchValue = "") {
+        const query = searchValue.trim().toLowerCase();
+        const matchingExercises = query
+            ? exerciseNames.filter((exerciseName) => exerciseName.toLowerCase().includes(query))
+            : exerciseNames;
+
+        selectionList.innerHTML = "";
+        matchingExercises.forEach((exerciseName) => {
+            const link = document.createElement("a");
+            link.className = "workout-button history-link";
+            link.href = `compare.html?exercise=${encodeURIComponent(exerciseName)}`;
+            link.textContent = exerciseName;
+            selectionList.appendChild(link);
+        });
+
+        searchStatus.textContent = query
+            ? `Showing ${matchingExercises.length} of ${exerciseNames.length} exercises`
+            : `${exerciseNames.length} ${exerciseNames.length === 1 ? "exercise" : "exercises"}`;
+        noResults.hidden = matchingExercises.length > 0;
+        noResults.textContent = `No exercises match “${searchValue.trim()}”.`;
+    }
+
+    searchInput.addEventListener("input", () => renderFilteredExercises(searchInput.value));
+
+    chartDetails.append(pickerText, searchLabel, searchInput, searchStatus, selectionList, noResults);
+    renderFilteredExercises();
 }
 
 function formatDate(value) {
