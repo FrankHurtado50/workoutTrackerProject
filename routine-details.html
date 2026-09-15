@@ -17,11 +17,28 @@
         <section class="routine-details-card">
             <a class="back-link" href="saved-routines.html" data-transition-direction="back">← Back to saved routines</a>
             <div id="routineDetailsContent">
-                <h1 id="routineDetailsName">Routine</h1>
+                <div class="routine-details-title-row">
+                    <h1 id="routineDetailsName">Routine</h1>
+                    <button type="button" id="editRoutineButton" class="edit-routine-button">Edit Routine</button>
+                </div>
                 <p id="routineDetailsDate" class="subtext"></p>
                 <p id="routineSavedMessage" class="routine-saved-message" role="status" hidden></p>
+                <p id="routineEditMessage" class="routine-edit-message" role="status" hidden></p>
                 <p id="routineProgress" class="routine-progress" aria-live="polite"></p>
                 <div id="routineChecklist" class="routine-checklist"></div>
+                <div id="routineEditActions" class="routine-edit-actions" hidden>
+                    <button type="button" id="showAddRoutineWorkout" class="add-routine-workout-button">
+                        + Add a workout to this routine?
+                    </button>
+                    <form id="addRoutineWorkoutForm" class="add-routine-workout-form" hidden>
+                        <label for="newRoutineWorkout">New workout</label>
+                        <input type="text" id="newRoutineWorkout" maxlength="80" placeholder="Example: Lat Pulldown" required>
+                        <div class="add-routine-workout-form-actions">
+                            <button type="submit">Save Workout</button>
+                            <button type="button" id="cancelAddRoutineWorkout" class="cancel-add-routine-workout">Cancel</button>
+                        </div>
+                    </form>
+                </div>
                 <button type="button" id="submitRoutineSelection" class="submit-routine-selection" disabled>
                     Submit Selected Workouts
                 </button>
@@ -35,6 +52,6 @@
     </main>
 
     <script src="auth-header.js"></script>
-    <script src="routine-details.js?v=20260907"></script>
+    <script src="routine-details.js?v=20260914"></script>
 </body>
 </html>

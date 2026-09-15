@@ -382,6 +382,34 @@ form {
     margin: 0 0 8px;
 }
 
+.routine-details-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.routine-details-title-row h1 {
+    min-width: 0;
+}
+
+.edit-routine-button {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    border: 1px solid #93c5fd;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.edit-routine-button:hover,
+.edit-routine-button[aria-pressed="true"] {
+    background: #dbeafe;
+}
+
 .routine-progress {
     margin: 20px 0 12px;
     color: #475569;
@@ -400,6 +428,29 @@ form {
     border: 1px solid #86efac;
     border-radius: 10px;
     font-weight: 700;
+}
+
+.routine-edit-message {
+    margin: 16px 0 0;
+    padding: 11px 13px;
+    border-radius: 9px;
+    font-weight: 700;
+}
+
+.routine-edit-message.success {
+    color: #166534;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+}
+
+.routine-edit-message.error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.routine-edit-message[hidden] {
+    display: none;
 }
 
 .routine-checklist {
@@ -443,6 +494,117 @@ form {
 
 .routine-checklist-item span {
     line-height: 1.35;
+}
+
+.routine-edit-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 14px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+}
+
+.routine-edit-item span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 700;
+}
+
+.delete-routine-workout {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #dc2626;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.delete-routine-workout:hover {
+    background: #b91c1c;
+}
+
+.routine-checklist-empty {
+    margin: 0;
+    text-align: center;
+}
+
+.routine-edit-actions {
+    margin-top: 14px;
+}
+
+.routine-edit-actions[hidden],
+.add-routine-workout-form[hidden],
+.add-routine-workout-button[hidden] {
+    display: none;
+}
+
+.add-routine-workout-button {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1px dashed #60a5fa;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.add-routine-workout-button:hover {
+    background: #dbeafe;
+}
+
+.add-routine-workout-form {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 16px;
+    box-sizing: border-box;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.add-routine-workout-form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.add-routine-workout-form-actions button {
+    flex: 1 1 0;
+    width: auto;
+}
+
+.cancel-add-routine-workout {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cancel-add-routine-workout:hover {
+    background: #cbd5e1;
+}
+
+@media (max-width: 520px) {
+    .routine-details-title-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .edit-routine-button {
+        width: 100%;
+    }
 }
 
 .submit-routine-selection {
