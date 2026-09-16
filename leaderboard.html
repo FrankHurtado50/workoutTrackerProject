@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Leaderboard</title>
+    <link rel="stylesheet" href="tracker.css">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <a class="home-button" href="welcome.html">Home</a>
+    <div class="page-header">
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="leaderboard-page">
+        <section class="leaderboard-card">
+            <div class="leaderboard-heading">
+                <div>
+                    <p class="leaderboard-eyebrow">Official exercises only</p>
+                    <h1>Leaderboard</h1>
+                    <p class="subtext">Compare the best results from registered users on this device.</p>
+                </div>
+                <span class="leaderboard-scope">This device</span>
+            </div>
+
+            <div id="leaderboardFilters" class="leaderboard-filters" hidden>
+                <label for="leaderboardExercise">Exercise
+                    <select id="leaderboardExercise"></select>
+                </label>
+                <label for="leaderboardMetric">Ranking
+                    <select id="leaderboardMetric">
+                        <option value="weight">Maximum weight</option>
+                        <option value="volume">Best workout volume</option>
+                        <option value="reps">Total reps</option>
+                    </select>
+                </label>
+            </div>
+
+            <p id="leaderboardStatus" class="leaderboard-status" aria-live="polite">Loading official exercises...</p>
+
+            <div id="leaderboardTableWrap" class="leaderboard-table-wrap" hidden>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Rank</th>
+                            <th scope="col">Athlete</th>
+                            <th scope="col" id="leaderboardScoreHeading">Result</th>
+                            <th scope="col">Recorded</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardRows"></tbody>
+                </table>
+            </div>
+
+            <p id="leaderboardEmpty" class="empty-state leaderboard-empty" hidden></p>
+            <p class="leaderboard-api-credit">
+                Exercise eligibility is based on the
+                <a href="https://exercise-api.com" target="_blank" rel="noopener noreferrer">ExerciseAPI catalog</a>.
+            </p>
+        </section>
+    </main>
+
+    <script src="auth-header.js"></script>
+    <script src="leaderboard.js?v=20260916"></script>
+</body>
+</html>
