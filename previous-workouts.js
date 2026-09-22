@@ -28,18 +28,16 @@ function getUserStorageKey(auth, email) {
 }
 
 function ensureUserWorkoutRecord(auth, currentUserEmail) {
-    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
-
     if (!auth.users[currentUserEmail]) {
         auth.users[currentUserEmail] = {
-            workouts: legacyWorkouts
+            workouts: []
         };
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
         return;
     }
 
     if (!Array.isArray(auth.users[currentUserEmail].workouts)) {
-        auth.users[currentUserEmail].workouts = legacyWorkouts;
+        auth.users[currentUserEmail].workouts = [];
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
     }
 }

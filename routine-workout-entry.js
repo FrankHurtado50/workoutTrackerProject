@@ -70,11 +70,10 @@ function saveRoutineWorkouts(newWorkouts) {
         if (!auth.users[userKey]) auth.users[userKey] = {};
         const existingWorkouts = Array.isArray(auth.users[userKey].workouts)
             ? auth.users[userKey].workouts
-            : guestWorkouts;
+            : [];
         const workouts = existingWorkouts.concat(newWorkouts);
         auth.users[userKey].workouts = workouts;
         localStorage.setItem(ROUTINE_ENTRY_AUTH_KEY, JSON.stringify(auth));
-        localStorage.setItem(ROUTINE_ENTRY_WORKOUTS_KEY, JSON.stringify(workouts));
         return;
     }
 

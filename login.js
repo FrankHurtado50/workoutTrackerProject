@@ -9,7 +9,6 @@ const signupPasswordInput = document.getElementById("signupPassword");
 const signupConfirmPasswordInput = document.getElementById("signupConfirmPassword");
 
 const AUTH_STORAGE_KEY = "workoutTrackerAuth";
-const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
 
 function isValidEmail(email) {
     return email.includes("@") && email.toLowerCase().endsWith(".com");
@@ -72,7 +71,6 @@ function getExistingUser(auth, email) {
 function saveLogin(email, password) {
     const normalizedEmail = normalizeEmail(email);
     const auth = getAuthStorage();
-    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
     const { key, user: existingUser } = getExistingUser(auth, email);
 
     if (!existingUser) {
@@ -84,11 +82,7 @@ function saveLogin(email, password) {
     }
 
     if (!Array.isArray(existingUser.workouts)) {
-        existingUser.workouts = legacyWorkouts;
-    }
-
-    if (!existingUser.workouts.length && legacyWorkouts.length) {
-        existingUser.workouts = legacyWorkouts;
+        existingUser.workouts = [];
     }
 
     auth.users[key] = existingUser;
@@ -98,14 +92,12 @@ function saveLogin(email, password) {
         firstName: existingUser.firstName || ""
     };
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(existingUser.workouts || []));
     return { success: true, email: normalizedEmail, firstName: existingUser.firstName || "" };
 }
 
 function signUp(email, password, firstName) {
     const normalizedEmail = normalizeEmail(email);
     const auth = getAuthStorage();
-    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
 
     if (Object.keys(auth.users).some((key) => normalizeEmail(key) === normalizedEmail)) {
         return { success: false, message: "This email is already signed up." };
@@ -114,7 +106,7 @@ function signUp(email, password, firstName) {
     auth.users[normalizedEmail] = {
         firstName,
         password,
-        workouts: Array.isArray(legacyWorkouts) ? legacyWorkouts : []
+        workouts: []
     };
 
     auth.currentUser = {
@@ -123,7 +115,6 @@ function signUp(email, password, firstName) {
         firstName
     };
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(auth.users[normalizedEmail].workouts));
     return { success: true, email: normalizedEmail, firstName };
 }
 

@@ -396,16 +396,15 @@ function getUserStorageKey(auth, email) {
 
 function ensureUserWorkoutRecord(auth, currentUserEmail) {
     const userKey = getUserStorageKey(auth, currentUserEmail);
-    const legacyWorkouts = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) || "[]");
 
     if (!auth.users[userKey]) {
-        auth.users[userKey] = { workouts: legacyWorkouts };
+        auth.users[userKey] = { workouts: [] };
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
         return;
     }
 
     if (!Array.isArray(auth.users[userKey].workouts)) {
-        auth.users[userKey].workouts = legacyWorkouts;
+        auth.users[userKey].workouts = [];
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
     }
 }
@@ -433,7 +432,6 @@ function saveWorkouts(workouts) {
         ensureUserWorkoutRecord(auth, userKey);
         auth.users[userKey].workouts = workouts;
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
         return;
     }
 
