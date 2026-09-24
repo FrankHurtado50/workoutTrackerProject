@@ -146,7 +146,8 @@ function renderActivityHeatmap(workouts) {
         weekStart.setDate(start.getDate() + (week * 7));
         const label = document.createElement("span");
         const month = weekStart.getMonth();
-        if (week === 0 || month !== previousMonth) {
+        const isFirstWeekOfMonth = weekStart.getDate() <= 7;
+        if (month !== previousMonth && isFirstWeekOfMonth) {
             label.textContent = weekStart.toLocaleDateString(undefined, { month: "short" });
         }
         monthLabels.appendChild(label);
