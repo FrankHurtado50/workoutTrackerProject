@@ -221,6 +221,11 @@ form {
     min-width: 0;
 }
 
+.routine-exercise-help {
+    margin-top: -6px;
+    margin-bottom: 14px;
+}
+
 .remove-routine-exercise {
     width: 42px;
     height: 42px;
