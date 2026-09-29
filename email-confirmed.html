@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmed</title>
+    <link rel="stylesheet" href="tracker.css?v=20260929-1">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
+    </div>
+
+    <main class="welcome-page">
+        <section class="welcome-card">
+            <div id="confirmationIcon" class="auth-status-icon confirmed" aria-hidden="true">✓</div>
+            <h1 id="confirmationHeading">Thank You for Confirming Your Email!</h1>
+            <p id="confirmationMessage" class="welcome-text">Your account is ready. Would you like to log in?</p>
+            <div class="auth-status-actions">
+                <a id="confirmationAction" class="login-button" href="login.html">Go to Log In</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20260929-1"></script>
+    <script src="email-confirmed.js?v=20260929-1"></script>
+</body>
+</html>

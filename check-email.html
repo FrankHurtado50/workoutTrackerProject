@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Your Email</title>
+    <link rel="stylesheet" href="tracker.css?v=20260929-1">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
+    </div>
+
+    <main class="welcome-page">
+        <section class="welcome-card">
+            <div class="auth-status-icon" aria-hidden="true">✉</div>
+            <h1>Check Your Email</h1>
+            <p class="welcome-text">
+                We sent a confirmation link<span id="confirmationEmail"></span>. Open the email and select
+                <strong>Confirm email address</strong> to finish creating your account.
+            </p>
+            <p class="subtext">If you don't see it, check your spam or junk folder.</p>
+            <div class="auth-status-actions">
+                <a class="login-button" href="login.html" data-transition-direction="back">Back to Log In</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="check-email.js?v=20260929-1"></script>
+</body>
+</html>

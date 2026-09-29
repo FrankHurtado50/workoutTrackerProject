@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In</title>
-    <link rel="stylesheet" href="tracker.css">
+    <link rel="stylesheet" href="tracker.css?v=20260929-1">
     <script src="transitions.js?v=20260818"></script>
 </head>
 <body>
-    <a class="home-button" href="welcome.html">Home</a>
     <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
         <a class="login-button" href="welcome.html">Back</a>
     </div>
 
@@ -22,10 +22,10 @@
                 <form class="auth-form" id="loginForm">
                     <h2>Log In</h2>
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="you@example.com">
+                    <input type="email" id="loginEmail" autocomplete="email" placeholder="you@example.com">
 
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Enter your password">
 
                     <button type="submit">Log In</button>
                 </form>
@@ -33,16 +33,16 @@
                 <form class="auth-form" id="signupForm">
                     <h2>Sign Up</h2>
                     <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" placeholder="you@example.com">
+                    <input type="email" id="signupEmail" autocomplete="email" placeholder="you@example.com">
 
                     <label for="signupFirstName">First Name</label>
-                    <input type="text" id="signupFirstName" placeholder="Taylor">
+                    <input type="text" id="signupFirstName" autocomplete="given-name" placeholder="Taylor">
 
                     <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" placeholder="Create a password">
+                    <input type="password" id="signupPassword" autocomplete="new-password" minlength="6" placeholder="Create a password">
 
                     <label for="signupConfirmPassword">Confirm Password</label>
-                    <input type="password" id="signupConfirmPassword" placeholder="Re-enter your password">
+                    <input type="password" id="signupConfirmPassword" autocomplete="new-password" minlength="6" placeholder="Re-enter your password">
 
                     <button type="submit">Sign Up</button>
                 </form>
@@ -52,6 +52,9 @@
         </section>
     </main>
 
-    <script src="login.js?v=20260921"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20260929-1"></script>
+    <script src="login.js?v=20260929-1"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const savedRoutinesList = document.getElementById("savedRoutinesList");
 
-const SAVED_ROUTINES_AUTH_KEY = "workoutTrackerAuth";
+const SAVED_ROUTINES_AUTH_KEY = "workoutTrackerAuthV2";
 const SAVED_GUEST_ROUTINES_KEY = "workoutTrackerRoutines";
 
 function normalizeSavedRoutineEmail(email) {

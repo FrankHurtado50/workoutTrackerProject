@@ -30,7 +30,7 @@ const templateWorkout = queryParams.get("template");
 const editWorkoutId = queryParams.get("edit");
 const prefilledExercise = queryParams.get("exercise");
 
-const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
 const EXERCISE_CACHE_KEY = "workoutTrackerExerciseSuggestionsV3";
 const EXERCISE_CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -85,10 +85,24 @@ function renderExerciseSuggestions(apiExercises = []) {
     return availableExerciseSuggestions.length;
 }
 
+function positionExerciseDropdown() {
+    const viewport = window.visualViewport;
+    const viewportTop = viewport ? viewport.offsetTop : 0;
+    const viewportBottom = viewportTop + (viewport ? viewport.height : window.innerHeight);
+    const bounds = exerciseCombobox.getBoundingClientRect();
+    const spaceBelow = viewportBottom - bounds.bottom - 12;
+    const spaceAbove = bounds.top - viewportTop - 12;
+    const openUp = spaceBelow < 180 && spaceAbove > spaceBelow;
+    exerciseCombobox.classList.toggle("drop-up", openUp);
+    exerciseSuggestions.style.maxHeight = `${Math.max(120, Math.min(240, openUp ? spaceAbove : spaceBelow))}px`;
+}
+
 function setExerciseDropdownOpen(isOpen) {
     exerciseSuggestions.hidden = !isOpen;
     exerciseInput.setAttribute("aria-expanded", String(isOpen));
     exerciseDropdownToggle.setAttribute("aria-expanded", String(isOpen));
+
+    if (isOpen) positionExerciseDropdown();
 
     if (!isOpen) {
         activeExerciseSuggestionIndex = -1;

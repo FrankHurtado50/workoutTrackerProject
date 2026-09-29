@@ -1,6 +1,6 @@
 const previousWorkoutList = document.getElementById("previousWorkoutList");
 
-const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
 
 function getAuthStorage() {

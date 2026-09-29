@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workout Total</title>
-    <link rel="stylesheet" href="tracker.css">
+    <link rel="stylesheet" href="tracker.css?v=20260928-2">
     <script src="transitions.js?v=20260818"></script>
 </head>
 <body>
-    <a class="home-button" href="welcome.html">Home</a>
     <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
         <a class="login-button" href="login.html">Log In</a>
     </div>
     <div class="result-card">
@@ -18,7 +18,10 @@
         <button id="backButton">Add another workout</button>
     </div>
 
-    <script src="auth-header.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20260928-2"></script>
+    <script src="auth-header.js?v=20260928-2"></script>
     <script src="result.js"></script>
 </body>
 </html>

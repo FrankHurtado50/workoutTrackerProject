@@ -6,7 +6,7 @@ const routineEntryMessage = document.getElementById("routineEntryMessage");
 const saveRoutineWorkoutsButton = document.getElementById("saveRoutineWorkouts");
 const backToRoutine = document.getElementById("backToRoutine");
 
-const ROUTINE_ENTRY_AUTH_KEY = "workoutTrackerAuth";
+const ROUTINE_ENTRY_AUTH_KEY = "workoutTrackerAuthV2";
 const ROUTINE_ENTRY_GUEST_ROUTINES_KEY = "workoutTrackerRoutines";
 const ROUTINE_ENTRY_GUEST_PROGRESS_KEY = "workoutTrackerRoutineProgress";
 const ROUTINE_ENTRY_WORKOUTS_KEY = "workoutTrackerWorkouts";

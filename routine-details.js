@@ -14,7 +14,7 @@ const addRoutineWorkoutForm = document.getElementById("addRoutineWorkoutForm");
 const newRoutineWorkout = document.getElementById("newRoutineWorkout");
 const cancelAddRoutineWorkout = document.getElementById("cancelAddRoutineWorkout");
 
-const ROUTINE_DETAILS_AUTH_KEY = "workoutTrackerAuth";
+const ROUTINE_DETAILS_AUTH_KEY = "workoutTrackerAuthV2";
 const ROUTINE_DETAILS_GUEST_KEY = "workoutTrackerRoutines";
 const ROUTINE_PROGRESS_GUEST_KEY = "workoutTrackerRoutineProgress";
 

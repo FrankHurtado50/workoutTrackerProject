@@ -1,8 +1,13 @@
-const HEADER_AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const HEADER_AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
 
 function getAuthStorage() {
-    const raw = localStorage.getItem(HEADER_AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
+    try {
+        const parsed = JSON.parse(localStorage.getItem(HEADER_AUTH_STORAGE_KEY) || "null");
+        if (parsed && parsed.users && typeof parsed.users === "object") return parsed;
+    } catch (error) {
+        console.warn("Unable to read the current workout profile.", error);
+    }
+    return { users: {}, currentUser: null };
 }
 
 function getCurrentUserEmail() {
@@ -19,44 +24,58 @@ function isLoggedIn() {
     return Boolean(getCurrentUserEmail());
 }
 
-function handleLogout() {
-    const auth = getAuthStorage();
-    auth.currentUser = null;
-    localStorage.setItem(HEADER_AUTH_STORAGE_KEY, JSON.stringify(auth));
-    window.navigateWithTransition("login.html", "forward");
+async function handleLogout(authLink) {
+    const previousText = authLink.textContent;
+    authLink.textContent = "Logging Out...";
+    authLink.setAttribute("aria-disabled", "true");
+
+    try {
+        if (window.workoutAuth) await window.workoutAuth.signOut();
+        window.navigateWithTransition("login.html", "forward");
+    } catch (error) {
+        console.error("Unable to log out.", error);
+        authLink.textContent = previousText;
+        authLink.removeAttribute("aria-disabled");
+    }
 }
 
 function updateAuthHeader() {
     const authLink = document.querySelector(".page-header .login-button");
-    if (!authLink) {
-        return;
-    }
+    if (!authLink) return;
 
     if (isLoggedIn()) {
         authLink.textContent = "Log Out";
         authLink.removeAttribute("href");
-        authLink.addEventListener("click", function (event) {
+        authLink.onclick = (event) => {
             event.preventDefault();
-            handleLogout();
-        }, { once: true });
+            if (authLink.getAttribute("aria-disabled") !== "true") handleLogout(authLink);
+        };
     } else {
         authLink.textContent = "Log In/Sign Up";
         authLink.setAttribute("href", "login.html");
+        authLink.removeAttribute("aria-disabled");
         authLink.onclick = null;
     }
 }
 
 function updateWelcomeHeading() {
     const welcomeHeading = document.getElementById("welcomeHeading");
-    if (!welcomeHeading) {
-        return;
-    }
-
+    if (!welcomeHeading) return;
     const firstName = getCurrentUserFirstName();
     welcomeHeading.textContent = firstName ? `Welcome ${firstName}` : "Welcome!";
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+function refreshAuthDisplay() {
     updateAuthHeader();
     updateWelcomeHeading();
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+    refreshAuthDisplay();
+    if (window.workoutAuth) {
+        await window.workoutAuth.ready;
+        refreshAuthDisplay();
+    }
 });
+
+window.addEventListener("workout-auth-changed", refreshAuthDisplay);

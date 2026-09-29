@@ -5,7 +5,7 @@ const addRoutineExerciseButton = document.getElementById("addRoutineExercise");
 const routineMessage = document.getElementById("routineMessage");
 const routineExerciseSuggestionStatus = document.getElementById("routineExerciseSuggestionStatus");
 
-const ROUTINE_AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const ROUTINE_AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
 const GUEST_ROUTINES_STORAGE_KEY = "workoutTrackerRoutines";
 const ROUTINE_EXERCISE_CACHE_KEY = "workoutTrackerExerciseSuggestionsV3";
 const ROUTINE_EXERCISE_CACHE_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -73,6 +73,17 @@ function setRoutineExerciseDropdownOpen(combobox, isOpen) {
     dropdown.hidden = !isOpen;
     input.setAttribute('aria-expanded', String(isOpen));
     toggle.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) {
+        const viewport = window.visualViewport;
+        const viewportTop = viewport ? viewport.offsetTop : 0;
+        const viewportBottom = viewportTop + (viewport ? viewport.height : window.innerHeight);
+        const bounds = combobox.getBoundingClientRect();
+        const spaceBelow = viewportBottom - bounds.bottom - 12;
+        const spaceAbove = bounds.top - viewportTop - 12;
+        const openUp = spaceBelow < 180 && spaceAbove > spaceBelow;
+        combobox.classList.toggle('drop-up', openUp);
+        dropdown.style.maxHeight = `${Math.max(120, Math.min(240, openUp ? spaceAbove : spaceBelow))}px`;
+    }
     if (!isOpen) {
         input.removeAttribute('aria-activedescendant');
         combobox.dataset.activeSuggestionIndex = '-1';

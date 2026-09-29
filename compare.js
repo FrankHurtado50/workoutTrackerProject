@@ -1,4 +1,4 @@
-const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
 const LEGACY_STORAGE_KEY = "workoutTrackerWorkouts";
 const params = new URLSearchParams(window.location.search);
 const exercise = params.get("exercise");
@@ -26,6 +26,8 @@ const chartEditNote = document.getElementById("chartEditNote");
 
 let interactiveChartPoints = [];
 let selectedWorkout = null;
+let activeChartWorkouts = [];
+let resizeTimer = null;
 
 const metricOptions = {
     volume: { label: "Total volume", unit: "lbs", aggregate: "sum" },
@@ -122,8 +124,15 @@ function getLocalDateKey(date) {
     return `${year}-${month}-${day}`;
 }
 
+function getActivityLayout() {
+    if (window.innerWidth <= 360) return { weeks: 14, cellSize: 10, gap: 2 };
+    if (window.innerWidth <= 420) return { weeks: 16, cellSize: 10, gap: 2 };
+    return { weeks: 18, cellSize: 12, gap: 3 };
+}
+
 function renderActivityHeatmap(workouts) {
-    const displayedWeeks = 18;
+    const activityLayout = getActivityLayout();
+    const displayedWeeks = activityLayout.weeks;
     const activityByDay = new Map();
     workouts.forEach((workout) => {
         const date = new Date(workout.recordedAt);
@@ -139,6 +148,10 @@ function renderActivityHeatmap(workouts) {
     start.setDate(start.getDate() - daysSinceMonday - ((displayedWeeks - 1) * 7));
     activityGrid.innerHTML = "";
     monthLabels.innerHTML = "";
+    activityGrid.dataset.displayedWeeks = String(displayedWeeks);
+    monthLabels.style.gridTemplateColumns = `repeat(${displayedWeeks}, ${activityLayout.cellSize}px)`;
+    monthLabels.style.gap = `${activityLayout.gap}px`;
+    activityGrid.style.width = `${(displayedWeeks * activityLayout.cellSize) + ((displayedWeeks - 1) * activityLayout.gap)}px`;
 
     let previousMonth = -1;
     for (let week = 0; week < displayedWeeks; week += 1) {
@@ -329,11 +342,23 @@ function escapeHtml(value) {
 
 function drawChart(points, metric) {
     const ctx = canvas.getContext("2d");
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = 40;
-    const chartHeight = height - padding * 2;
-    const chartWidth = width - padding * 2;
+    const bounds = canvas.getBoundingClientRect();
+    const width = Math.max(1, Math.round(bounds.width));
+    const height = window.innerWidth <= 420 ? 250 : window.innerWidth <= 620 ? 280 : 320;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    const padding = {
+        top: 38,
+        right: width <= 480 ? 18 : 40,
+        bottom: 52,
+        left: width <= 480 ? 28 : 40
+    };
+    const chartHeight = height - padding.top - padding.bottom;
+    const chartWidth = width - padding.left - padding.right;
     const highestValue = Math.max(...points.map((point) => point.value), 1);
     const maxValue = points.length === 1 ? highestValue * 2 : highestValue;
     const stepX = points.length > 1 ? chartWidth / (points.length - 1) : 0;
@@ -343,21 +368,22 @@ function drawChart(points, metric) {
     ctx.fillRect(0, 0, width, height);
     ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
-    for (let y = padding; y <= height - padding; y += 60) {
+    for (let line = 0; line <= 4; line += 1) {
+        const y = padding.top + ((chartHeight / 4) * line);
         ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
         ctx.stroke();
     }
 
     ctx.fillStyle = "#0f172a";
-    ctx.font = "14px Arial";
+    ctx.font = `${width <= 480 ? 12 : 14}px Arial`;
     ctx.textAlign = "left";
     ctx.fillText(metricOptions[metric].label, 12, 20);
 
     const chartPoints = points.map((point, index) => ({
-        x: points.length === 1 ? width / 2 : padding + index * stepX,
-        y: height - padding - (point.value / maxValue) * chartHeight,
+        x: points.length === 1 ? width / 2 : padding.left + index * stepX,
+        y: height - padding.bottom - (point.value / maxValue) * chartHeight,
         point
     }));
     interactiveChartPoints = chartPoints;
@@ -368,6 +394,11 @@ function drawChart(points, metric) {
     ctx.lineWidth = 3;
     ctx.stroke();
 
+    const maxLabels = Math.max(2, Math.floor(chartWidth / (width <= 480 ? 76 : 90)) + 1);
+    const labelInterval = points.length > maxLabels
+        ? Math.ceil((points.length - 1) / (maxLabels - 1))
+        : 1;
+
     chartPoints.forEach((chartPoint, index) => {
         ctx.beginPath();
         ctx.arc(chartPoint.x, chartPoint.y, 6, 0, Math.PI * 2);
@@ -377,10 +408,18 @@ function drawChart(points, metric) {
         ctx.strokeStyle = "#ffffff";
         ctx.stroke();
         ctx.fillStyle = "#0f172a";
-        ctx.font = "12px Arial";
+        ctx.font = `${width <= 480 ? 10 : 12}px Arial`;
         ctx.textAlign = "center";
-        ctx.fillText(chartPoint.point.value, chartPoint.x, chartPoint.y - 12);
-        ctx.fillText(chartPoint.point.label, chartPoint.x, height - padding + 20);
+        const isLastPoint = index === chartPoints.length - 1;
+        const hasRoomBeforeLast = chartPoints.length - 1 - index >= Math.ceil(labelInterval / 2);
+        const shouldShowLabel = isLastPoint || (index % labelInterval === 0 && hasRoomBeforeLast);
+        if (points.length <= 6 || shouldShowLabel) {
+            ctx.fillText(chartPoint.point.value, chartPoint.x, chartPoint.y - 12);
+        }
+        if (shouldShowLabel) {
+            ctx.textAlign = index === 0 ? "left" : isLastPoint ? "right" : "center";
+            ctx.fillText(chartPoint.point.label, chartPoint.x, height - padding.bottom + 20);
+        }
     });
 }
 
@@ -405,8 +444,8 @@ function renderWorkoutChart(workouts) {
 
 function findWorkoutAtCanvasPosition(event) {
     const bounds = canvas.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) * (canvas.width / bounds.width);
-    const y = (event.clientY - bounds.top) * (canvas.height / bounds.height);
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
 
     const match = interactiveChartPoints.find((chartPoint) => {
         if (!chartPoint.point.workout) return false;
@@ -449,6 +488,7 @@ if (!exercise) {
         canvas.hidden = true;
         chartDetails.innerText = "No matching workout history was found for this exercise.";
     } else {
+        activeChartWorkouts = workouts;
         chartControls.hidden = false;
         addWorkoutButton.hidden = false;
         renderWorkoutChart(workouts);
@@ -518,4 +558,13 @@ workoutActionModal.addEventListener("click", (event) => {
 });
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !workoutActionModal.hidden) closeActionModal();
+});
+
+window.addEventListener("resize", () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+        const displayedWeeks = Number(activityGrid.dataset.displayedWeeks || 0);
+        if (displayedWeeks !== getActivityLayout().weeks) renderActivityHeatmap(storedWorkouts);
+        if (activeChartWorkouts.length && !canvas.hidden) renderWorkoutChart(activeChartWorkouts);
+    }, 120);
 });

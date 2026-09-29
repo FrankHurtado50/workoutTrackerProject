@@ -7,218 +7,158 @@ const signupEmailInput = document.getElementById("signupEmail");
 const signupFirstNameInput = document.getElementById("signupFirstName");
 const signupPasswordInput = document.getElementById("signupPassword");
 const signupConfirmPasswordInput = document.getElementById("signupConfirmPassword");
-
-const AUTH_STORAGE_KEY = "workoutTrackerAuth";
+const loginSubmitButton = loginForm.querySelector('button[type="submit"]');
+const signupSubmitButton = signupForm.querySelector('button[type="submit"]');
 
 function isValidEmail(email) {
-    return email.includes("@") && email.toLowerCase().endsWith(".com");
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 }
 
-function setMessage(text, color) {
+function setMessage(text, type = "error") {
     loginMessage.textContent = text;
-    loginMessage.style.color = color;
+    loginMessage.className = `login-message ${type}`;
 }
 
-function getCurrentUserEmail() {
-    const auth = getAuthStorage();
-    return auth.currentUser ? auth.currentUser.email : null;
+function clearMessage() {
+    loginMessage.textContent = "";
+    loginMessage.className = "login-message";
 }
 
-function normalizeEmail(email) {
-    return email.trim().toLowerCase();
-}
-
-function getAuthStorage() {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { users: {}, currentUser: null };
-}
-
-function getSavedAccount() {
-    const auth = getAuthStorage();
-    return auth.currentUser ? auth.currentUser : null;
+function setFormBusy(form, isBusy, busyText) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (!submitButton.dataset.defaultText) submitButton.dataset.defaultText = submitButton.textContent;
+    submitButton.disabled = isBusy;
+    submitButton.textContent = isBusy ? busyText : submitButton.dataset.defaultText;
 }
 
 function redirectToWelcome() {
     window.navigateWithTransition("welcome.html", "back");
 }
 
-function populateSavedCredentials() {
-    const savedAccount = getSavedAccount();
-    if (!savedAccount) {
-        return;
-    }
-
-    loginEmailInput.value = savedAccount.email || "";
-    signupEmailInput.value = savedAccount.email || "";
-    signupFirstNameInput.value = savedAccount.firstName || "";
-    loginPasswordInput.value = "";
-    signupPasswordInput.value = "";
-    signupConfirmPasswordInput.value = "";
-    setMessage("Welcome back! Redirecting to your tracker.", "#166534");
-    window.setTimeout(redirectToWelcome, 800);
-}
-
-function getExistingUser(auth, email) {
-    const normalizedEmail = normalizeEmail(email);
-    if (normalizedEmail in auth.users) {
-        return { key: normalizedEmail, user: auth.users[normalizedEmail] };
-    }
-
-    const existingKey = Object.keys(auth.users).find((key) => normalizeEmail(key) === normalizedEmail);
-    return existingKey ? { key: existingKey, user: auth.users[existingKey] } : { key: normalizedEmail, user: undefined };
-}
-
-function saveLogin(email, password) {
-    const normalizedEmail = normalizeEmail(email);
-    const auth = getAuthStorage();
-    const { key, user: existingUser } = getExistingUser(auth, email);
-
-    if (!existingUser) {
-        return { success: false, message: "invalid Credentails" };
-    }
-
-    if (existingUser.password !== password) {
-        return { success: false, message: "invalid Credentails" };
-    }
-
-    if (!Array.isArray(existingUser.workouts)) {
-        existingUser.workouts = [];
-    }
-
-    auth.users[key] = existingUser;
-    auth.currentUser = {
-        email: normalizedEmail,
-        password,
-        firstName: existingUser.firstName || ""
-    };
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    return { success: true, email: normalizedEmail, firstName: existingUser.firstName || "" };
-}
-
-function signUp(email, password, firstName) {
-    const normalizedEmail = normalizeEmail(email);
-    const auth = getAuthStorage();
-
-    if (Object.keys(auth.users).some((key) => normalizeEmail(key) === normalizedEmail)) {
-        return { success: false, message: "This email is already signed up." };
-    }
-
-    auth.users[normalizedEmail] = {
-        firstName,
-        password,
-        workouts: []
-    };
-
-    auth.currentUser = {
-        email: normalizedEmail,
-        password,
-        firstName
-    };
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-    return { success: true, email: normalizedEmail, firstName };
-}
-
-function clearMessage() {
-    if (loginMessage.textContent) {
-        loginMessage.textContent = "";
-    }
+function getFriendlyAuthError(error) {
+    const message = String(error && error.message || "").toLowerCase();
+    if (message.includes("invalid login credentials")) return "The email or password is incorrect.";
+    if (message.includes("email not confirmed")) return "Please confirm your email before logging in.";
+    if (message.includes("user already registered")) return "This email is already signed up.";
+    if (message.includes("password") && message.includes("characters")) return "Please use a password with at least 6 characters.";
+    if (message.includes("rate limit")) return "Too many attempts. Please wait a moment and try again.";
+    if (message.includes("fetch") || message.includes("network")) return "Unable to reach the login service. Check your internet connection.";
+    return error && error.message ? error.message : "Something went wrong. Please try again.";
 }
 
 [loginEmailInput, loginPasswordInput, signupEmailInput, signupFirstNameInput, signupPasswordInput, signupConfirmPasswordInput].forEach((input) => {
     input.addEventListener("input", () => {
-        input.style.borderColor = "#cbd5e1";
+        input.classList.remove("invalid");
         clearMessage();
     });
 });
 
-loginForm.addEventListener("submit", function (event) {
+loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-
     const email = loginEmailInput.value.trim();
-    const password = loginPasswordInput.value.trim();
+    const password = loginPasswordInput.value;
 
     if (!email || !password) {
-        setMessage("Please enter both your email and password.", "#b91c1c");
-        loginEmailInput.style.borderColor = "#b91c1c";
-        loginPasswordInput.style.borderColor = "#b91c1c";
+        setMessage("Please enter both your email and password.");
+        loginEmailInput.classList.toggle("invalid", !email);
+        loginPasswordInput.classList.toggle("invalid", !password);
         return;
     }
 
     if (!isValidEmail(email)) {
-        setMessage("Please enter a valid email ending in .com.", "#b91c1c");
-        loginEmailInput.style.borderColor = "#b91c1c";
-        loginPasswordInput.style.borderColor = "#cbd5e1";
+        setMessage("Please enter a valid email address.");
+        loginEmailInput.classList.add("invalid");
         return;
     }
 
-    const loginResult = saveLogin(email, password);
-    if (!loginResult.success) {
-        setMessage(loginResult.message, "#b91c1c");
-        loginPasswordInput.style.borderColor = "#b91c1c";
-        return;
+    setFormBusy(loginForm, true, "Logging In...");
+    try {
+        const data = await window.workoutAuth.signIn(email, password);
+        const firstName = String(data.user && data.user.user_metadata && data.user.user_metadata.first_name || "").trim();
+        setMessage(`Welcome ${firstName || data.user.email}!`, "success");
+        redirectToWelcome();
+    } catch (error) {
+        loginPasswordInput.classList.add("invalid");
+        setMessage(getFriendlyAuthError(error));
+    } finally {
+        setFormBusy(loginForm, false, "Logging In...");
     }
-
-    loginEmailInput.style.borderColor = "#16a34a";
-    loginPasswordInput.style.borderColor = "#16a34a";
-    setMessage(`Welcome ${loginResult.firstName || loginResult.email}!`, "#166534");
-    redirectToWelcome();
 });
 
-signupForm.addEventListener("submit", function (event) {
+signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-
     const email = signupEmailInput.value.trim();
     const firstName = signupFirstNameInput.value.trim();
-    const password = signupPasswordInput.value.trim();
-    const confirmPassword = signupConfirmPasswordInput.value.trim();
+    const password = signupPasswordInput.value;
+    const confirmPassword = signupConfirmPasswordInput.value;
 
     if (!firstName || !email || !password || !confirmPassword) {
-        setMessage("Please fill in your first name, email, and password.", "#b91c1c");
-        signupFirstNameInput.style.borderColor = "#b91c1c";
-        signupEmailInput.style.borderColor = "#b91c1c";
-        signupPasswordInput.style.borderColor = "#b91c1c";
-        signupConfirmPasswordInput.style.borderColor = "#b91c1c";
+        setMessage("Please fill in your first name, email, and password.");
+        signupFirstNameInput.classList.toggle("invalid", !firstName);
+        signupEmailInput.classList.toggle("invalid", !email);
+        signupPasswordInput.classList.toggle("invalid", !password);
+        signupConfirmPasswordInput.classList.toggle("invalid", !confirmPassword);
         return;
     }
 
     if (!isValidEmail(email)) {
-        setMessage("Please enter a valid email ending in .com.", "#b91c1c");
-        signupEmailInput.style.borderColor = "#b91c1c";
+        setMessage("Please enter a valid email address.");
+        signupEmailInput.classList.add("invalid");
+        return;
+    }
+
+    if (password.length < 6) {
+        setMessage("Please use a password with at least 6 characters.");
+        signupPasswordInput.classList.add("invalid");
         return;
     }
 
     if (password !== confirmPassword) {
-        signupEmailInput.value = email;
-        signupFirstNameInput.value = firstName;
         signupPasswordInput.value = "";
         signupConfirmPasswordInput.value = "";
-        setMessage("passwords do not match", "#b91c1c");
-        signupPasswordInput.style.borderColor = "#b91c1c";
-        signupConfirmPasswordInput.style.borderColor = "#b91c1c";
+        signupPasswordInput.classList.add("invalid");
+        signupConfirmPasswordInput.classList.add("invalid");
+        setMessage("The passwords do not match.");
         return;
     }
 
-    const signupResult = signUp(email, password, firstName);
-    if (!signupResult.success) {
-        setMessage(signupResult.message, "#b91c1c");
-        signupEmailInput.style.borderColor = "#b91c1c";
-        return;
+    setFormBusy(signupForm, true, "Creating Account...");
+    try {
+        const data = await window.workoutAuth.signUp(email, password, firstName);
+        if (data.session) {
+            setMessage(`Welcome ${firstName}!`, "success");
+            redirectToWelcome();
+        } else {
+            signupPasswordInput.value = "";
+            signupConfirmPasswordInput.value = "";
+            window.navigateWithTransition(`check-email.html?email=${encodeURIComponent(email)}`, "forward");
+        }
+    } catch (error) {
+        setMessage(getFriendlyAuthError(error));
+    } finally {
+        setFormBusy(signupForm, false, "Creating Account...");
     }
-
-    signupEmailInput.style.borderColor = "#16a34a";
-    signupPasswordInput.style.borderColor = "#16a34a";
-    signupConfirmPasswordInput.style.borderColor = "#16a34a";
-    signupFirstNameInput.style.borderColor = "#16a34a";
-    setMessage(`Welcome ${signupResult.firstName}!`, "#166534");
-    redirectToWelcome();
 });
 
-populateSavedCredentials();
+async function initializeLoginPage() {
+    if (!window.workoutAuth || !window.workoutAuth.isConfigured) {
+        loginSubmitButton.disabled = true;
+        signupSubmitButton.disabled = true;
+        setMessage("Online login needs your Supabase project URL and publishable key in supabase-config.js.", "setup");
+        return;
+    }
 
-const savedUserEmail = getCurrentUserEmail();
-if (savedUserEmail) {
-    const title = document.querySelector(".welcome-card h1");
-    if (title) {
-        title.textContent = `Welcome ${savedUserEmail}`;
+    try {
+        await window.workoutAuth.ready;
+        const session = await window.workoutAuth.getSession();
+        if (session && session.user) {
+            const firstName = String(session.user.user_metadata && session.user.user_metadata.first_name || "").trim();
+            setMessage(`You are already logged in${firstName ? ` as ${firstName}` : ""}. Redirecting...`, "success");
+            window.setTimeout(redirectToWelcome, 500);
+        }
+    } catch (error) {
+        setMessage(getFriendlyAuthError(error));
     }
 }
+
+initializeLoginPage();

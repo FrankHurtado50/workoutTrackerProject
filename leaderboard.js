@@ -7,7 +7,7 @@ const leaderboardRows = document.getElementById("leaderboardRows");
 const leaderboardScoreHeading = document.getElementById("leaderboardScoreHeading");
 const leaderboardEmpty = document.getElementById("leaderboardEmpty");
 
-const LEADERBOARD_AUTH_KEY = "workoutTrackerAuth";
+const LEADERBOARD_AUTH_KEY = "workoutTrackerAuthV2";
 const LEADERBOARD_EXERCISE_CACHE_KEY = "workoutTrackerExerciseSuggestionsV3";
 const LEADERBOARD_EXERCISE_CACHE_DURATION = 24 * 60 * 60 * 1000;
 const LEADERBOARD_EXERCISE_API_URL = "https://exercise-api.com/v1/exercises?tier=core&sort=preferred_rank&limit=200";
@@ -174,16 +174,20 @@ function renderLeaderboard() {
 
         const rankCell = document.createElement("td");
         rankCell.className = "leaderboard-rank";
+        rankCell.dataset.label = "Rank";
         rankCell.textContent = String(rank);
 
         const athleteCell = document.createElement("td");
+        athleteCell.dataset.label = "Athlete";
         athleteCell.textContent = ranking.isCurrentUser ? `${ranking.name} (You)` : ranking.name;
 
         const scoreCell = document.createElement("td");
         scoreCell.className = "leaderboard-score";
+        scoreCell.dataset.label = metricOption.label;
         scoreCell.textContent = `${ranking.score.toLocaleString()} ${metricOption.unit}`;
 
         const dateCell = document.createElement("td");
+        dateCell.dataset.label = "Recorded";
         dateCell.textContent = formatLeaderboardDate(ranking.recordedAt);
 
         row.append(rankCell, athleteCell, scoreCell, dateCell);
