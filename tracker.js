@@ -446,10 +446,11 @@ function saveWorkouts(workouts) {
         ensureUserWorkoutRecord(auth, userKey);
         auth.users[userKey].workouts = workouts;
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
+    return Promise.resolve();
 }
 
 function renderWorkoutButton(workout) {
@@ -508,7 +509,8 @@ function renderWorkouts() {
     latestWorkouts.forEach(renderWorkoutButton);
 }
 
-function initializeTracker() {
+async function initializeTracker() {
+    if (window.workoutData) await window.workoutData.ready;
     renderWorkouts();
     loadExerciseSuggestions();
 
@@ -547,7 +549,7 @@ function initializeTracker() {
         }
     });
 
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
         event.preventDefault();
 
         const exercise = exerciseInput.value.trim();
@@ -646,7 +648,15 @@ function initializeTracker() {
         } else {
             workouts.push(workout);
         }
-        saveWorkouts(workouts);
+        submitWorkoutButton.disabled = true;
+        try {
+            await saveWorkouts(workouts);
+        } catch (error) {
+            console.error("Unable to save the workout online.", error);
+            alert("Your workout was saved on this device, but it could not be saved online. Please try again.");
+            submitWorkoutButton.disabled = false;
+            return;
+        }
         renderWorkouts();
 
         params.set("total", totalWeight);

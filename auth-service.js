@@ -115,6 +115,9 @@
     window.workoutAuth = {
         isConfigured: Boolean(client),
         ready,
+        getClient() {
+            return client;
+        },
         async signIn(email, password) {
             if (!client) throw new Error("Online login has not been configured yet.");
             const { data, error } = await client.auth.signInWithPassword({ email, password });

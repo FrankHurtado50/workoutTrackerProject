@@ -64,4 +64,9 @@ function renderSavedRoutines() {
     });
 }
 
-renderSavedRoutines();
+async function initializeSavedRoutines() {
+    if (window.workoutData) await window.workoutData.ready;
+    renderSavedRoutines();
+}
+
+initializeSavedRoutines();

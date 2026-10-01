@@ -74,10 +74,11 @@ function saveRoutineWorkouts(newWorkouts) {
         const workouts = existingWorkouts.concat(newWorkouts);
         auth.users[userKey].workouts = workouts;
         localStorage.setItem(ROUTINE_ENTRY_AUTH_KEY, JSON.stringify(auth));
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(ROUTINE_ENTRY_WORKOUTS_KEY, JSON.stringify(guestWorkouts.concat(newWorkouts)));
+    return Promise.resolve();
 }
 
 function renderVariableSetRows(card, setCount) {
@@ -205,7 +206,8 @@ function buildWorkoutFromColumn(card) {
     return { ...baseWorkout, reps, weight, total: reps * weight * sets };
 }
 
-function initializeRoutineWorkoutEntry() {
+async function initializeRoutineWorkoutEntry() {
+    if (window.workoutData) await window.workoutData.ready;
     const params = new URLSearchParams(window.location.search);
     const routineId = params.get("id");
     const dateKey = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") || "") ? params.get("date") : getTodayKey();
@@ -249,7 +251,7 @@ function initializeRoutineWorkoutEntry() {
         ? "Save 1 Workout"
         : `Save All ${selectedExercises.length} Workouts`;
 
-    routineWorkoutForm.addEventListener("submit", (event) => {
+    routineWorkoutForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         routineEntryMessage.textContent = "";
 
@@ -262,7 +264,15 @@ function initializeRoutineWorkoutEntry() {
         const columns = Array.from(routineWorkoutColumns.querySelectorAll(".routine-workout-column"));
         const workouts = columns.map(buildWorkoutFromColumn);
         saveRoutineWorkoutsButton.disabled = true;
-        saveRoutineWorkouts(workouts);
+        try {
+            await saveRoutineWorkouts(workouts);
+        } catch (error) {
+            console.error("Unable to save the routine workouts online.", error);
+            routineEntryMessage.textContent = "Your workouts were saved on this device, but they could not be saved online. Please try again.";
+            routineEntryMessage.className = "routine-message error";
+            saveRoutineWorkoutsButton.disabled = false;
+            return;
+        }
 
         const destination = new URLSearchParams({ id: routine.id, saved: String(workouts.length) });
         window.navigateWithTransition(`routine-details.html?${destination.toString()}`, "back");

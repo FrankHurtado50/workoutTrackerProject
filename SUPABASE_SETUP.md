@@ -38,3 +38,9 @@ In **Authentication > URL Configuration**, use these values while testing locall
 - Redirect URLs: add `http://localhost:4173/email-confirmed.html`
 
 The redirect entry lets the signup email open the tracker's styled confirmation page. When the tracker is published, replace the Site URL and add the hosted version of `email-confirmed.html` to the redirect list.
+
+## 5. Create secure online workout storage
+
+Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `database-setup.sql`, and select **Run**.
+
+This creates one protected data record per account. Row Level Security restricts normal workout and routine access to the signed-in owner. The leaderboard functions return only an athlete's first name, best score, and workout date; they do not expose notes, routines, or full workout history.

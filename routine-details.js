@@ -83,10 +83,11 @@ function saveRoutineProgress(storage, progress) {
         localStorage.setItem(ROUTINE_DETAILS_AUTH_KEY, JSON.stringify(latestAuth));
         storage.auth = latestAuth;
         storage.userKey = latestUserKey;
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(ROUTINE_PROGRESS_GUEST_KEY, JSON.stringify(progress));
+    return Promise.resolve();
 }
 
 function saveRoutineData(storage) {
@@ -102,11 +103,12 @@ function saveRoutineData(storage) {
         localStorage.setItem(ROUTINE_DETAILS_AUTH_KEY, JSON.stringify(latestAuth));
         storage.auth = latestAuth;
         storage.userKey = latestUserKey;
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(ROUTINE_DETAILS_GUEST_KEY, JSON.stringify(storage.routines));
     localStorage.setItem(ROUTINE_PROGRESS_GUEST_KEY, JSON.stringify(storage.progress));
+    return Promise.resolve();
 }
 
 function updateRoutineProgressText(checkedCount, totalCount) {
@@ -154,7 +156,7 @@ function updateProgressAfterWorkoutDelete(deletedIndex) {
     );
 }
 
-function deleteRoutineWorkout(index) {
+async function deleteRoutineWorkout(index) {
     const exercises = getActiveExercises();
     const exercise = exercises[index];
     if (!exercise || !window.confirm(
@@ -163,7 +165,13 @@ function deleteRoutineWorkout(index) {
 
     exercises.splice(index, 1);
     updateProgressAfterWorkoutDelete(index);
-    saveRoutineData(activeRoutineStorage);
+    try {
+        await saveRoutineData(activeRoutineStorage);
+    } catch (error) {
+        console.error("Unable to update the routine online.", error);
+        showRoutineEditMessage("The workout was removed on this device, but the online routine could not be updated.", "error");
+        return;
+    }
     showRoutineEditMessage(
         `${exercise} was removed from ${activeRoutine.name}. Its previous workout history was kept.`
     );
@@ -224,7 +232,10 @@ function renderRoutineChecklist() {
             }
 
             activeRoutineStorage.progress[activeProgressKey] = Array.from(checkedIndexes).sort((first, second) => first - second);
-            saveRoutineProgress(activeRoutineStorage, activeRoutineStorage.progress);
+            saveRoutineProgress(activeRoutineStorage, activeRoutineStorage.progress).catch((error) => {
+                console.error("Unable to save routine progress online.", error);
+                showRoutineEditMessage("Your selection was saved on this device, but it could not be saved online.", "error");
+            });
             label.classList.toggle("checked", checkbox.checked);
             updateRoutineProgressText(checkedIndexes.size, exercises.length);
         });
@@ -252,7 +263,8 @@ function setRoutineEditing(enabled) {
     renderRoutineChecklist();
 }
 
-function renderRoutineDetails() {
+async function renderRoutineDetails() {
+    if (window.workoutData) await window.workoutData.ready;
     const routineId = new URLSearchParams(window.location.search).get("id");
     activeRoutineStorage = getRoutineDetailsStorage();
     activeRoutine = activeRoutineStorage.routines.find((item) => String(item.id) === String(routineId));
@@ -291,8 +303,17 @@ function renderRoutineDetails() {
         setRoutineEditing(!isEditingRoutine);
     });
 
-    submitRoutineSelection.addEventListener("click", () => {
+    submitRoutineSelection.addEventListener("click", async () => {
         if (!checkedIndexes.size) return;
+        submitRoutineSelection.disabled = true;
+        try {
+            await saveRoutineProgress(activeRoutineStorage, activeRoutineStorage.progress);
+        } catch (error) {
+            console.error("Unable to save routine progress online.", error);
+            showRoutineEditMessage("Your selections could not be saved online. Please try again.", "error");
+            submitRoutineSelection.disabled = false;
+            return;
+        }
         const destination = new URLSearchParams({ id: activeRoutine.id, date: activeTodayKey });
         window.navigateWithTransition(`routine-workout-entry.html?${destination.toString()}`, "forward");
     });
@@ -310,7 +331,7 @@ function renderRoutineDetails() {
         clearRoutineEditMessage();
     });
 
-    addRoutineWorkoutForm.addEventListener("submit", (event) => {
+    addRoutineWorkoutForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const exercise = newRoutineWorkout.value.trim();
         if (!exercise) return;
@@ -325,12 +346,22 @@ function renderRoutineDetails() {
         }
 
         activeRoutine.exercises.push(exercise);
-        saveRoutineData(activeRoutineStorage);
+        const saveButton = addRoutineWorkoutForm.querySelector('button[type="submit"]');
+        saveButton.disabled = true;
+        try {
+            await saveRoutineData(activeRoutineStorage);
+        } catch (error) {
+            console.error("Unable to update the routine online.", error);
+            showRoutineEditMessage("The workout was added on this device, but the online routine could not be updated.", "error");
+            saveButton.disabled = false;
+            return;
+        }
         addRoutineWorkoutForm.reset();
         addRoutineWorkoutForm.hidden = true;
         showAddRoutineWorkout.hidden = false;
         showRoutineEditMessage(`${exercise} was added to ${activeRoutine.name}.`);
         renderRoutineChecklist();
+        saveButton.disabled = false;
     });
 
     renderRoutineChecklist();

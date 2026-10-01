@@ -91,13 +91,14 @@ function saveStoredWorkouts(workouts) {
         const userKey = ensureUserWorkoutRecord(auth, currentUserEmail);
         auth.users[userKey].workouts = workouts;
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(workouts));
+    return Promise.resolve();
 }
 
-function ensureWorkoutIds(workouts) {
+async function ensureWorkoutIds(workouts) {
     let changed = false;
     workouts.forEach((workout) => {
         if (!workout.id) {
@@ -105,7 +106,7 @@ function ensureWorkoutIds(workouts) {
             changed = true;
         }
     });
-    if (changed) saveStoredWorkouts(workouts);
+    if (changed) await saveStoredWorkouts(workouts);
 }
 
 function getExerciseNames(workouts) {
@@ -471,31 +472,43 @@ function openActionModal(workout) {
     editWorkoutButton.focus();
 }
 
-const storedWorkouts = getStoredWorkouts();
-ensureWorkoutIds(storedWorkouts);
-renderActivityHeatmap(storedWorkouts);
+let storedWorkouts = [];
 
-if (!exercise) {
-    renderExercisePicker(storedWorkouts);
-} else {
-    const workouts = storedWorkouts
-        .filter((item) => String(item.exercise || "").toLowerCase() === exercise.toLowerCase())
-        .sort((a, b) => new Date(a.recordedAt) - new Date(b.recordedAt));
-    compareTitle.innerText = `Workout history for ${exercise}`;
-    backButton.innerText = "Choose another exercise";
+async function initializeComparePage() {
+    if (window.workoutData) await window.workoutData.ready;
+    storedWorkouts = getStoredWorkouts();
 
-    if (!workouts.length) {
-        canvas.hidden = true;
-        chartDetails.innerText = "No matching workout history was found for this exercise.";
+    try {
+        await ensureWorkoutIds(storedWorkouts);
+    } catch (error) {
+        console.error("Unable to save workout identifiers online.", error);
+    }
+    renderActivityHeatmap(storedWorkouts);
+
+    if (!exercise) {
+        renderExercisePicker(storedWorkouts);
     } else {
-        activeChartWorkouts = workouts;
-        chartControls.hidden = false;
-        addWorkoutButton.hidden = false;
-        renderWorkoutChart(workouts);
-        metricSelect.addEventListener("change", () => renderWorkoutChart(workouts));
-        groupSelect.addEventListener("change", () => renderWorkoutChart(workouts));
+        const workouts = storedWorkouts
+            .filter((item) => String(item.exercise || "").toLowerCase() === exercise.toLowerCase())
+            .sort((a, b) => new Date(a.recordedAt) - new Date(b.recordedAt));
+        compareTitle.innerText = `Workout history for ${exercise}`;
+        backButton.innerText = "Choose another exercise";
+
+        if (!workouts.length) {
+            canvas.hidden = true;
+            chartDetails.innerText = "No matching workout history was found for this exercise.";
+        } else {
+            activeChartWorkouts = workouts;
+            chartControls.hidden = false;
+            addWorkoutButton.hidden = false;
+            renderWorkoutChart(workouts);
+            metricSelect.addEventListener("change", () => renderWorkoutChart(workouts));
+            groupSelect.addEventListener("change", () => renderWorkoutChart(workouts));
+        }
     }
 }
+
+initializeComparePage();
 
 backButton.addEventListener("click", () => {
     window.navigateWithTransition(exercise ? "compare.html" : "welcome.html", "back");
@@ -537,13 +550,21 @@ cancelDeleteButton.addEventListener("click", () => {
     deleteWorkoutButton.focus();
 });
 
-confirmDeleteButton.addEventListener("click", () => {
+confirmDeleteButton.addEventListener("click", async () => {
     if (!selectedWorkout) return;
     const remainingWorkouts = getStoredWorkouts().filter((workout) => workout.id !== selectedWorkout.id);
     const hasMoreForExercise = remainingWorkouts.some(
         (workout) => String(workout.exercise || "").toLowerCase() === String(selectedWorkout.exercise || "").toLowerCase()
     );
-    saveStoredWorkouts(remainingWorkouts);
+    confirmDeleteButton.disabled = true;
+    try {
+        await saveStoredWorkouts(remainingWorkouts);
+    } catch (error) {
+        console.error("Unable to delete the workout online.", error);
+        confirmDeleteButton.disabled = false;
+        alert("The workout was removed on this device, but the online copy could not be updated. Please try again.");
+        return;
+    }
     window.navigateWithTransition(
         hasMoreForExercise
             ? `compare.html?exercise=${encodeURIComponent(selectedWorkout.exercise)}`

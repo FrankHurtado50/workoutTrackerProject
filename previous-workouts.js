@@ -100,4 +100,9 @@ function renderPreviousWorkouts() {
     });
 }
 
-renderPreviousWorkouts();
+async function initializePreviousWorkouts() {
+    if (window.workoutData) await window.workoutData.ready;
+    renderPreviousWorkouts();
+}
+
+initializePreviousWorkouts();

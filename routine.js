@@ -282,10 +282,11 @@ function saveStoredRoutines(routines) {
         if (!auth.users[userKey]) auth.users[userKey] = {};
         auth.users[userKey].routines = routines;
         localStorage.setItem(ROUTINE_AUTH_STORAGE_KEY, JSON.stringify(auth));
-        return;
+        return window.workoutData ? window.workoutData.save() : Promise.resolve();
     }
 
     localStorage.setItem(GUEST_ROUTINES_STORAGE_KEY, JSON.stringify(routines));
+    return Promise.resolve();
 }
 
 function createRoutineId() {
@@ -357,8 +358,9 @@ routineForm.addEventListener("input", () => {
     routineMessage.textContent = "";
 });
 
-routineForm.addEventListener("submit", (event) => {
+routineForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (window.workoutData) await window.workoutData.ready;
 
     const routineName = routineNameInput.value.trim();
     const exercises = Array.from(routineExerciseList.querySelectorAll(".routine-exercise-input"))
@@ -386,7 +388,17 @@ routineForm.addEventListener("submit", (event) => {
         exercises,
         createdAt: new Date().toISOString()
     });
-    saveStoredRoutines(routines);
+    const saveButton = routineForm.querySelector('button[type="submit"]');
+    saveButton.disabled = true;
+    try {
+        await saveStoredRoutines(routines);
+    } catch (error) {
+        console.error("Unable to save the routine online.", error);
+        routineMessage.textContent = "The routine was saved on this device, but it could not be saved online. Please try again.";
+        routineMessage.className = "routine-message error";
+        saveButton.disabled = false;
+        return;
+    }
 
     routineMessage.textContent = `“${routineName}” was saved with ${exercises.length} ${exercises.length === 1 ? "workout" : "workouts"}.`;
     routineMessage.className = "routine-message success";
@@ -394,6 +406,7 @@ routineForm.addEventListener("submit", (event) => {
     routineExerciseList.innerHTML = "";
     addRoutineExerciseField();
     routineNameInput.focus();
+    saveButton.disabled = false;
 });
 
 addRoutineExerciseField();

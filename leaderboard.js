@@ -71,17 +71,23 @@ function getCachedLeaderboardExercises() {
     }
 }
 
-function getLeaderboardEligibleExercises(apiExercises) {
-    const auth = getLeaderboardAuth();
-    const recordedExerciseNames = new Set();
+function getLeaderboardEligibleExercises(apiExercises, onlineExerciseNames = null) {
+    const recordedExerciseNames = new Set(
+        Array.isArray(onlineExerciseNames)
+            ? onlineExerciseNames.map(normalizeLeaderboardValue)
+            : []
+    );
 
-    Object.values(auth.users || {}).forEach((user) => {
-        const workouts = Array.isArray(user.workouts) ? user.workouts : [];
-        workouts.forEach((workout) => {
-            const name = normalizeLeaderboardValue(workout.exercise);
-            if (name) recordedExerciseNames.add(name);
+    if (!Array.isArray(onlineExerciseNames)) {
+        const auth = getLeaderboardAuth();
+        Object.values(auth.users || {}).forEach((user) => {
+            const workouts = Array.isArray(user.workouts) ? user.workouts : [];
+            workouts.forEach((workout) => {
+                const name = normalizeLeaderboardValue(workout.exercise);
+                if (name) recordedExerciseNames.add(name);
+            });
         });
-    });
+    }
 
     return apiExercises.filter((exerciseName) => recordedExerciseNames.has(normalizeLeaderboardValue(exerciseName)));
 }
@@ -145,11 +151,26 @@ function formatLeaderboardDate(value) {
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function renderLeaderboard() {
+async function renderLeaderboard() {
     const exerciseName = leaderboardExercise.value;
     const metric = leaderboardMetric.value;
     const metricOption = leaderboardMetricOptions[metric];
-    const rankings = getLeaderboardRankings(exerciseName, metric);
+    leaderboardStatus.textContent = "Loading rankings...";
+
+    let rankings;
+    try {
+        rankings = window.workoutData && window.workoutData.isAvailable
+            ? await window.workoutData.getLeaderboard(exerciseName, metric)
+            : getLeaderboardRankings(exerciseName, metric);
+    } catch (error) {
+        console.error("Unable to load the online leaderboard.", error);
+        rankings = getLeaderboardRankings(exerciseName, metric);
+    }
+
+    rankings.sort((first, second) => {
+        if (second.score !== first.score) return second.score - first.score;
+        return first.name.localeCompare(second.name);
+    });
 
     leaderboardRows.innerHTML = "";
     leaderboardScoreHeading.textContent = metricOption.label;
@@ -199,8 +220,23 @@ function renderLeaderboard() {
     leaderboardStatus.textContent = `${rankings.length} ${rankings.length === 1 ? "athlete" : "athletes"} ranked for ${exerciseName}.`;
 }
 
-function displayLeaderboardExercises(apiExercises) {
-    officialLeaderboardExercises = getLeaderboardEligibleExercises(uniqueLeaderboardExerciseNames(apiExercises));
+async function displayLeaderboardExercises(apiExercises) {
+    let onlineExerciseNames = null;
+    if (window.workoutData) {
+        await window.workoutData.ready;
+        if (window.workoutData.isAvailable) {
+            try {
+                onlineExerciseNames = await window.workoutData.getLeaderboardExercises();
+            } catch (error) {
+                console.error("Unable to load online leaderboard exercises.", error);
+            }
+        }
+    }
+
+    officialLeaderboardExercises = getLeaderboardEligibleExercises(
+        uniqueLeaderboardExerciseNames(apiExercises),
+        onlineExerciseNames
+    );
     leaderboardExercise.innerHTML = "";
 
     if (!officialLeaderboardExercises.length) {
@@ -220,12 +256,13 @@ function displayLeaderboardExercises(apiExercises) {
     });
 
     leaderboardFilters.hidden = false;
-    renderLeaderboard();
+    await renderLeaderboard();
 }
 
 async function loadLeaderboardExercises() {
+    if (window.workoutData) await window.workoutData.ready;
     const cached = getCachedLeaderboardExercises();
-    if (cached.exercises.length) displayLeaderboardExercises(cached.exercises);
+    if (cached.exercises.length) await displayLeaderboardExercises(cached.exercises);
 
     if (cached.exercises.length && Date.now() - cached.fetchedAt < LEADERBOARD_EXERCISE_CACHE_DURATION) {
         return;
@@ -243,7 +280,7 @@ async function loadLeaderboardExercises() {
             exercises: apiExercises,
             fetchedAt: Date.now()
         }));
-        displayLeaderboardExercises(apiExercises);
+        await displayLeaderboardExercises(apiExercises);
     } catch (error) {
         if (!cached.exercises.length) {
             leaderboardFilters.hidden = true;
@@ -256,6 +293,6 @@ async function loadLeaderboardExercises() {
     }
 }
 
-leaderboardExercise.addEventListener("change", renderLeaderboard);
-leaderboardMetric.addEventListener("change", renderLeaderboard);
+leaderboardExercise.addEventListener("change", () => renderLeaderboard());
+leaderboardMetric.addEventListener("change", () => renderLeaderboard());
 loadLeaderboardExercises();
