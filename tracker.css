@@ -943,6 +943,25 @@ form {
     font-size: 20px;
 }
 
+.auth-form-centered {
+    margin-right: auto;
+    margin-left: auto;
+    text-align: left;
+}
+
+.forgot-password-link {
+    display: block;
+    margin-top: 14px;
+    color: #2563eb;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline;
+}
+
 label {
     display: block;
     margin-bottom: 8px;

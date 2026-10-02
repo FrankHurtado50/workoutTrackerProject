@@ -7,12 +7,15 @@
     <script>
         const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
         const queryParams = new URLSearchParams(window.location.search);
+        const authType = hashParams.get("type") || queryParams.get("type");
         const isAuthCallback =
             hashParams.has("access_token") ||
             hashParams.has("error") ||
             queryParams.has("code") ||
             queryParams.has("error");
-        const destination = isAuthCallback ? "email-confirmed.html" : "welcome.html";
+        const destination = authType === "recovery"
+            ? "reset-password.html"
+            : (isAuthCallback ? "email-confirmed.html" : "welcome.html");
 
         window.location.replace(`${destination}${window.location.search}${window.location.hash}`);
     </script>

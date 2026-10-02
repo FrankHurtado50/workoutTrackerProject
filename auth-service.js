@@ -2,6 +2,8 @@
     const APP_AUTH_STORAGE_KEY = "workoutTrackerAuthV2";
     const LEGACY_AUTH_STORAGE_KEY = "workoutTrackerAuth";
     const config = window.WORKOUT_TRACKER_SUPABASE_CONFIG || {};
+    const initialAuthType = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("type");
+    let isPasswordRecovery = initialAuthType === "recovery";
     const hasSupabaseLibrary = Boolean(window.supabase && typeof window.supabase.createClient === "function");
     const isConfigured =
         /^https:\/\/.+\.supabase\.co\/?$/i.test(String(config.url || "").trim()) &&
@@ -106,7 +108,8 @@
 
     if (client) {
         client.auth.onAuthStateChange((event, session) => {
-            if (["INITIAL_SESSION", "SIGNED_IN", "SIGNED_OUT", "TOKEN_REFRESHED", "USER_UPDATED"].includes(event)) {
+            if (event === "PASSWORD_RECOVERY") isPasswordRecovery = true;
+            if (["INITIAL_SESSION", "SIGNED_IN", "SIGNED_OUT", "TOKEN_REFRESHED", "USER_UPDATED", "PASSWORD_RECOVERY"].includes(event)) {
                 syncLocalProfile(session ? session.user : null);
             }
         });
@@ -139,6 +142,22 @@
             if (error) throw error;
             if (data.session && data.user) syncLocalProfile(data.user);
             return data;
+        },
+        async requestPasswordReset(email) {
+            if (!client) throw new Error("Online login has not been configured yet.");
+            const redirectTo = new URL("reset-password.html", window.location.href).href;
+            const { data, error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+            if (error) throw error;
+            return data;
+        },
+        async updatePassword(password) {
+            if (!client) throw new Error("Online login has not been configured yet.");
+            const { data, error } = await client.auth.updateUser({ password });
+            if (error) throw error;
+            return data;
+        },
+        get isPasswordRecovery() {
+            return isPasswordRecovery;
         },
         async signOut() {
             if (!client) {

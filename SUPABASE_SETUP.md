@@ -36,8 +36,14 @@ In **Authentication > URL Configuration**, use these values while testing locall
 
 - Site URL: `http://localhost:4173/welcome.html`
 - Redirect URLs: add `http://localhost:4173/email-confirmed.html`
+- Redirect URLs: add `http://localhost:4173/reset-password.html`
 
 The redirect entry lets the signup email open the tracker's styled confirmation page. When the tracker is published, replace the Site URL and add the hosted version of `email-confirmed.html` to the redirect list.
+
+For the published tracker, keep these exact redirect URLs:
+
+- `https://frankhurtado50.github.io/workoutTrackerProject/email-confirmed.html`
+- `https://frankhurtado50.github.io/workoutTrackerProject/reset-password.html`
 
 ## 5. Create secure online workout storage
 
