@@ -15,9 +15,10 @@ async function initializeConfirmationPage() {
         confirmationIcon.textContent = "!";
         confirmationIcon.classList.remove("confirmed");
         confirmationHeading.textContent = "We Couldn't Confirm That Email";
-        confirmationMessage.textContent = decodeURIComponent(confirmationError.replace(/\+/g, " "));
+        confirmationMessage.textContent = "That confirmation link has expired or was already used. Request a fresh email, then open only the newest confirmation link.";
         confirmationMessage.classList.add("auth-status-error");
-        confirmationAction.textContent = "Return to Sign Up";
+        confirmationAction.textContent = "Send a New Confirmation Link";
+        confirmationAction.href = "check-email.html?resend=1";
         return;
     }
 

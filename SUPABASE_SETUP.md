@@ -45,6 +45,8 @@ For the published tracker, keep these exact redirect URLs:
 - `https://frankhurtado50.github.io/workoutTrackerProject/email-confirmed.html`
 - `https://frankhurtado50.github.io/workoutTrackerProject/reset-password.html`
 
+Before inviting real users, configure a custom SMTP provider under **Authentication > Emails > SMTP Settings**. Supabase's built-in email service is intended only for testing, has a very small project-wide sending limit, and may not reliably deliver confirmation or password-reset messages to users outside the project team.
+
 ## 5. Create secure online workout storage
 
 Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `database-setup.sql`, and select **Run**.

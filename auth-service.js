@@ -143,6 +143,17 @@
             if (data.session && data.user) syncLocalProfile(data.user);
             return data;
         },
+        async resendConfirmation(email) {
+            if (!client) throw new Error("Online login has not been configured yet.");
+            const emailRedirectTo = new URL("email-confirmed.html", window.location.href).href;
+            const { data, error } = await client.auth.resend({
+                type: "signup",
+                email,
+                options: { emailRedirectTo }
+            });
+            if (error) throw error;
+            return data;
+        },
         async requestPasswordReset(email) {
             if (!client) throw new Error("Online login has not been configured yet.");
             const redirectTo = new URL("reset-password.html", window.location.href).href;

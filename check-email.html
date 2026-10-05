@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check Your Email</title>
-    <link rel="stylesheet" href="tracker.css?v=20260929-1">
+    <link rel="stylesheet" href="tracker.css?v=20261005-1">
     <script src="transitions.js?v=20260818"></script>
 </head>
 <body>
@@ -20,13 +20,24 @@
                 We sent a confirmation link<span id="confirmationEmail"></span>. Open the email and select
                 <strong>Confirm email address</strong> to finish creating your account.
             </p>
-            <p class="subtext">If you don't see it, check your spam or junk folder.</p>
+            <p class="subtext">If you don't see it, check your spam or junk folder. Only the newest confirmation link will work.</p>
+
+            <form id="resendConfirmationForm" class="auth-form auth-form-centered">
+                <label for="resendConfirmationEmail">Didn't receive it?</label>
+                <input type="email" id="resendConfirmationEmail" autocomplete="email" placeholder="you@example.com" required>
+                <button id="resendConfirmationButton" type="submit">Resend Confirmation Email</button>
+            </form>
+            <p id="resendConfirmationMessage" class="login-message" aria-live="polite"></p>
+
             <div class="auth-status-actions">
                 <a class="login-button" href="login.html" data-transition-direction="back">Back to Log In</a>
             </div>
         </section>
     </main>
 
-    <script src="check-email.js?v=20260929-1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20261005-1"></script>
+    <script src="check-email.js?v=20261005-1"></script>
 </body>
 </html>
