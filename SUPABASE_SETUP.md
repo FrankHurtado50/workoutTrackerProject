@@ -40,7 +40,11 @@ In **Authentication > URL Configuration**, use these values while testing locall
 
 The redirect entry lets the signup email open the tracker's styled confirmation page. When the tracker is published, replace the Site URL and add the hosted version of `email-confirmed.html` to the redirect list.
 
-For the published tracker, keep these exact redirect URLs:
+For the published tracker, use the custom-domain URLs below. Keep the older GitHub Pages URLs during the transition until the custom domain and HTTPS are working:
+
+- Site URL: `https://getlockedfr.com/welcome.html`
+- `https://getlockedfr.com/email-confirmed.html`
+- `https://getlockedfr.com/reset-password.html`
 
 - `https://frankhurtado50.github.io/workoutTrackerProject/email-confirmed.html`
 - `https://frankhurtado50.github.io/workoutTrackerProject/reset-password.html`
