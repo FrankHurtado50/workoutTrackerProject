@@ -400,13 +400,11 @@ routineForm.addEventListener("submit", async (event) => {
         return;
     }
 
-    routineMessage.textContent = `“${routineName}” was saved with ${exercises.length} ${exercises.length === 1 ? "workout" : "workouts"}.`;
-    routineMessage.className = "routine-message success";
-    routineForm.reset();
-    routineExerciseList.innerHTML = "";
-    addRoutineExerciseField();
-    routineNameInput.focus();
-    saveButton.disabled = false;
+    if (typeof window.navigateWithTransition === "function") {
+        window.navigateWithTransition("saved-routines.html");
+    } else {
+        window.location.href = "saved-routines.html";
+    }
 });
 
 addRoutineExerciseField();
