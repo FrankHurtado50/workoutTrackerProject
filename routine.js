@@ -106,7 +106,7 @@ function renderRoutineExerciseDropdown(combobox, searchValue = '', showAll = fal
         const emptyMessage = document.createElement('p');
         emptyMessage.className = 'exercise-dropdown-empty';
         emptyMessage.textContent = routineExerciseSuggestions.length
-            ? 'No matches. Keep typing to use your own exercise.'
+            ? 'Not in the list? No problem—you can still save the exercise name you entered.'
             : 'Exercise suggestions are still loading. You can type your own exercise.';
         dropdown.appendChild(emptyMessage);
     } else {
