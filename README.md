@@ -11,6 +11,7 @@ LockedFR is a mobile-friendly workout tracker for recording exercises, building 
 - Secure account signup, login, email confirmation, and password recovery
 - Individual workout logging with sets, reps, weight, and notes
 - Custom workout routines that can be saved, edited, and reused
+- A private motivation and progress photo board with an optional home background
 - Workout history with search, progress graphs, and a calendar activity chart
 - Workout editing and deletion from the progress chart
 - Leaderboards for supported exercises

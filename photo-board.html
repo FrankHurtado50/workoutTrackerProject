@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Motivation Board</title>
+    <link rel="stylesheet" href="tracker.css?v=20261111-1">
+    <script src="transitions.js?v=20260818"></script>
+</head>
+<body>
+    <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="photo-board-page">
+        <section class="photo-board-shell">
+            <div class="photo-board-heading">
+                <div>
+                    <p class="photo-board-eyebrow">Your space</p>
+                    <h1>My Motivation Board</h1>
+                    <p class="subtext">Keep inspiration and progress photos together. Everything here is private to your account.</p>
+                </div>
+                <button type="button" class="photo-board-add-button" id="photoBoardAddButton">+ Add Photo</button>
+            </div>
+
+            <p id="photoBoardStatus" class="photo-board-status" aria-live="polite">Loading your photos...</p>
+            <div id="photoBoardGrid" class="photo-board-grid" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20260930-1"></script>
+    <script src="auth-header.js?v=20260928-2"></script>
+    <script src="photo-board.js?v=20261111-1"></script>
+</body>
+</html>

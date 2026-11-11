@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Workout Tracker</title>
-    <link rel="stylesheet" href="tracker.css?v=20260928-2">
+    <link rel="stylesheet" href="tracker.css?v=20261111-1">
     <script src="transitions.js?v=20260818"></script>
 </head>
 <body>
@@ -12,9 +12,28 @@
         <a class="login-button" href="login.html">Log In</a>
     </div>
     <main class="welcome-page">
-        <section class="welcome-card">
-            <h1 id="welcomeHeading">Welcome!</h1>
-            <p class="welcome-text">What would you like to do today?</p>
+        <section class="welcome-card home-welcome-card">
+            <div class="welcome-personal-row">
+                <a class="photo-sticker photo-sticker-board" id="motivationBoardLink" href="photo-board.html">
+                    <span class="photo-sticker-preview" id="welcomeFeaturedPreview" hidden>
+                        <img id="welcomeFeaturedImage" alt="Your featured motivation photo">
+                    </span>
+                    <span class="photo-sticker-copy">
+                        <small>My</small>
+                        Motivation Board
+                    </span>
+                </a>
+
+                <div class="welcome-heading-copy">
+                    <h1 id="welcomeHeading">Welcome!</h1>
+                    <p class="welcome-text">What would you like to do today?</p>
+                </div>
+
+                <button class="photo-sticker photo-sticker-add" id="openPhotoUpload" type="button">
+                    <span class="photo-sticker-plus" aria-hidden="true">+</span>
+                    <span>Add Photo</span>
+                </button>
+            </div>
 
             <div class="choice-grid">
                 <a class="choice-card" href="tracker.html?mode=new">
@@ -49,5 +68,6 @@
     <script src="auth-service.js?v=20260930-1"></script>
     <script src="online-data.js?v=20260930-1"></script>
     <script src="auth-header.js?v=20260928-2"></script>
+    <script src="photo-board.js?v=20261111-1"></script>
 </body>
 </html>

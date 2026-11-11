@@ -56,3 +56,9 @@ Before inviting real users, configure a custom SMTP provider under **Authenticat
 Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `database-setup.sql`, and select **Run**.
 
 This creates one protected data record per account. Row Level Security restricts normal workout and routine access to the signed-in owner. The leaderboard functions return only an athlete's first name, best score, and workout date; they do not expose notes, routines, or full workout history.
+
+## 6. Create private photo-board storage
+
+Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `photo-board-setup.sql`, and select **Run**.
+
+This creates a private image bucket and protected photo metadata. Each signed-in user can access only the photos stored inside their own account folder. Images are never made public; the website displays them using short-lived signed links.
