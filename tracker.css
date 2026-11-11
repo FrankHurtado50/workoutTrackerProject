@@ -72,10 +72,11 @@ html {
 
 body {
     font-family: Arial, sans-serif;
+    --app-background-photo: url("https://media.istockphoto.com/id/1493959975/photo/young-man-working-out-with-battle-ropes-in-gym.jpg?s=612x612&w=0&k=20&c=HCwHnSVYRuJNHc-uF9J5WAXCWztLLxNtgS-OdMX7AVM=");
     background-color: #f5f7fb;
     background-image:
         linear-gradient(rgba(245, 247, 251, 0.7), rgba(245, 247, 251, 0.76)),
-        url("https://media.istockphoto.com/id/1493959975/photo/young-man-working-out-with-battle-ropes-in-gym.jpg?s=612x612&w=0&k=20&c=HCwHnSVYRuJNHc-uF9J5WAXCWztLLxNtgS-OdMX7AVM=");
+        var(--app-background-photo);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -97,9 +98,10 @@ body {
 }
 
 body.user-photo-background {
+    --app-background-photo: var(--user-home-photo);
     background-image:
         linear-gradient(rgba(15, 23, 42, 0.58), rgba(15, 23, 42, 0.68)),
-        var(--user-home-photo);
+        var(--app-background-photo);
 }
 
 body.photo-modal-open {
@@ -147,6 +149,29 @@ body.photo-modal-open {
 
 .home-button {
     position: static;
+}
+
+.theme-toggle {
+    display: inline-grid;
+    flex: 0 0 44px;
+    place-items: center;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1px solid rgba(148, 163, 184, 0.75);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+    color: #0f172a;
+    font-size: 21px;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease;
+}
+
+.theme-toggle:hover {
+    background: #ffffff;
+    transform: translateY(-1px) rotate(8deg);
 }
 
 .back-link {
@@ -2681,4 +2706,288 @@ textarea:focus-visible {
     .home-welcome-card .choice-card p {
         display: none;
     }
+}
+
+/* Dark mode */
+html[data-theme="dark"] body {
+    background-color: #020617;
+    background-image:
+        linear-gradient(rgba(2, 6, 23, 0.78), rgba(2, 6, 23, 0.86)),
+        var(--app-background-photo);
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] body.user-photo-background {
+    background-image:
+        linear-gradient(rgba(2, 6, 23, 0.7), rgba(2, 6, 23, 0.8)),
+        var(--app-background-photo);
+}
+
+html[data-theme="dark"] .theme-toggle {
+    border-color: #475569;
+    background: rgba(15, 23, 42, 0.94);
+    color: #fbbf24;
+}
+
+html[data-theme="dark"] .theme-toggle:hover {
+    background: #1e293b;
+}
+
+html[data-theme="dark"] :is(
+    .welcome-card,
+    form,
+    .saved-routines-card,
+    .leaderboard-card,
+    .routine-details-card,
+    .routine-workout-entry-heading,
+    .routine-workout-column,
+    .routine-entry-empty,
+    .result-card,
+    .chart-card,
+    .workout-modal-card,
+    .photo-board-card,
+    .photo-upload-dialog
+) {
+    border-color: #334155;
+    background: #111827;
+    color: #e5e7eb;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .photo-board-shell {
+    border-color: #334155;
+    background:
+        radial-gradient(circle at 12px 12px, rgba(96, 165, 250, 0.16) 1px, transparent 1.5px) 0 0 / 24px 24px,
+        rgba(17, 24, 39, 0.97);
+    color: #e5e7eb;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme="dark"] :is(.photo-upload-form, .routine-workout-entry-form) {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] :is(
+    .welcome-text,
+    .subtext,
+    .choice-card p,
+    .leaderboard-status,
+    .leaderboard-api-credit,
+    .routine-progress,
+    .input-help,
+    .optional-label,
+    .chart-details,
+    .chart-action-hint,
+    .history-search-status,
+    .photo-board-status,
+    .photo-card-meta,
+    .photo-card-caption,
+    .photo-board-empty p,
+    .photo-upload-intro,
+    .photo-option-row,
+    .workout-modal-card p,
+    .activity-card p,
+    .activity-legend,
+    .month-labels,
+    .weekday-labels
+) {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] :is(.back-link, .forgot-password-link, .input-help a, .leaderboard-api-credit a) {
+    color: #93c5fd;
+}
+
+html[data-theme="dark"] :is(
+    .choice-card,
+    .saved-routine-card,
+    .workout-button,
+    .routine-add-button,
+    .add-routine-workout-button,
+    .edit-routine-button,
+    .chart-edit-note,
+    .workout-note
+) {
+    border-color: #1d4ed8;
+    background: #172554;
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] :is(.choice-card, .saved-routine-card, .workout-button):hover,
+html[data-theme="dark"] :is(.routine-add-button, .add-routine-workout-button, .edit-routine-button):hover,
+html[data-theme="dark"] .edit-routine-button[aria-pressed="true"] {
+    background: #1e3a8a;
+}
+
+html[data-theme="dark"] :is(.choice-card h2, .saved-routine-card h2) {
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] :is(
+    .saved-routines-empty,
+    .routine-checklist-item,
+    .routine-edit-item,
+    .add-routine-workout-form,
+    .activity-card,
+    .exercise-dropdown,
+    .exercise-dropdown-option,
+    .secondary-button,
+    .photo-board-empty
+) {
+    border-color: #475569;
+    background: #182235;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] :is(.routine-checklist-item, .exercise-dropdown-option, .secondary-button):hover,
+html[data-theme="dark"] .exercise-dropdown-option.active {
+    border-color: #3b82f6;
+    background: #1e3a5f;
+    color: #dbeafe;
+}
+
+html[data-theme="dark"] .routine-checklist-item.checked {
+    border-color: #22c55e;
+    background: #052e2b;
+    color: #bbf7d0;
+}
+
+html[data-theme="dark"] :is(input, textarea, select) {
+    border-color: #475569;
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] :is(input, textarea)::placeholder {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] :is(.leaderboard-filters select, .chart-controls select, .photo-upload-form select) {
+    border-color: #475569;
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .exercise-dropdown-toggle {
+    border-left-color: #475569;
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .exercise-dropdown-toggle:hover,
+html[data-theme="dark"] .exercise-dropdown-toggle[aria-expanded="true"] {
+    background: #334155;
+}
+
+html[data-theme="dark"] .exercise-dropdown-option {
+    border-bottom-color: #334155;
+}
+
+html[data-theme="dark"] .secondary-button {
+    border-color: #475569;
+    background: #1e293b;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .toggle-box {
+    background: #0f172a;
+}
+
+html[data-theme="dark"] .leaderboard-scope {
+    border-color: #1d4ed8;
+    background: #172554;
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] .leaderboard-table-wrap {
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .leaderboard-table :is(th, td) {
+    border-bottom-color: #334155;
+}
+
+html[data-theme="dark"] .leaderboard-table th,
+html[data-theme="dark"] .leaderboard-table tbody tr:nth-child(even) {
+    background: #182235;
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .leaderboard-table tbody tr.current-user-rank {
+    background: #172554;
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] .leaderboard-table tbody tr,
+html[data-theme="dark"] .leaderboard-table tbody tr:nth-child(even) {
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .leaderboard-rank {
+    color: #93c5fd;
+}
+
+html[data-theme="dark"] .activity-day.level-0 {
+    border-color: #475569;
+    background: #1e293b;
+}
+
+html[data-theme="dark"] .photo-card-image-wrap,
+html[data-theme="dark"] .photo-upload-preview img {
+    background: #0f172a;
+}
+
+html[data-theme="dark"] .photo-card-action {
+    border-color: #1d4ed8;
+    background: #172554;
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] .photo-card-action:hover {
+    background: #1e3a8a;
+}
+
+html[data-theme="dark"] .photo-card-action.danger,
+html[data-theme="dark"] .remove-routine-exercise {
+    border-color: #7f1d1d;
+    background: #450a0a;
+    color: #fecaca;
+}
+
+html[data-theme="dark"] .photo-upload-close,
+html[data-theme="dark"] .modal-close {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .photo-board-status.login-required {
+    border-color: #1d4ed8;
+    background: #172554;
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] #resultText {
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .chart-edit-note {
+    color: #bfdbfe;
+}
+
+html[data-theme="dark"] .cancel-button,
+html[data-theme="dark"] .cancel-add-routine-workout {
+    border-color: #475569;
+    background: #1e293b;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .cancel-button:hover,
+html[data-theme="dark"] .cancel-add-routine-workout:hover {
+    background: #334155;
+}
+
+html[data-theme="dark"] .workout-modal,
+html[data-theme="dark"] .photo-upload-backdrop {
+    background: rgba(2, 6, 23, 0.8);
 }

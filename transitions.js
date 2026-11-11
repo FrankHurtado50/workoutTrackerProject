@@ -1,6 +1,67 @@
 (function () {
     const TRANSITION_STORAGE_KEY = "workoutTrackerTransitionDirection";
+    const THEME_STORAGE_KEY = "workoutTrackerTheme";
     const validDirections = new Set(["forward", "back"]);
+    const validThemes = new Set(["light", "dark"]);
+
+    function getPreferredTheme() {
+        try {
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            if (validThemes.has(savedTheme)) return savedTheme;
+        } catch (error) {
+            // The browser preference still provides a safe default.
+        }
+        return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+    }
+
+    function applyTheme(theme, savePreference = false) {
+        const safeTheme = validThemes.has(theme) ? theme : "light";
+        document.documentElement.dataset.theme = safeTheme;
+        document.documentElement.style.colorScheme = safeTheme;
+        if (savePreference) {
+            try {
+                localStorage.setItem(THEME_STORAGE_KEY, safeTheme);
+            } catch (error) {
+                // The theme still applies for this page when storage is unavailable.
+            }
+        }
+        window.dispatchEvent(new CustomEvent("workout-theme-changed", { detail: { theme: safeTheme } }));
+        return safeTheme;
+    }
+
+    let activeTheme = applyTheme(getPreferredTheme());
+
+    function updateThemeToggle(button) {
+        const switchingTo = activeTheme === "dark" ? "light" : "dark";
+        button.innerHTML = `<span aria-hidden="true">${activeTheme === "dark" ? "&#9728;" : "&#9790;"}</span>`;
+        button.setAttribute("aria-label", `Switch to ${switchingTo} mode`);
+        button.title = `Switch to ${switchingTo} mode`;
+        button.setAttribute("aria-pressed", String(activeTheme === "dark"));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const header = document.querySelector(".page-header");
+        if (!header || header.querySelector(".theme-toggle")) return;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "theme-toggle";
+        updateThemeToggle(button);
+        button.addEventListener("click", function () {
+            activeTheme = applyTheme(activeTheme === "dark" ? "light" : "dark", true);
+            updateThemeToggle(button);
+        });
+        header.appendChild(button);
+    });
+
+    window.addEventListener("storage", function (event) {
+        if (event.key !== THEME_STORAGE_KEY || !validThemes.has(event.newValue)) return;
+        activeTheme = applyTheme(event.newValue);
+        const button = document.querySelector(".theme-toggle");
+        if (button) updateThemeToggle(button);
+    });
 
     function applyTransitionDirection(direction) {
         const safeDirection = validDirections.has(direction) ? direction : "forward";

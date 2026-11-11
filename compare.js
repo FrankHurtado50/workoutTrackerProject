@@ -343,6 +343,26 @@ function escapeHtml(value) {
 
 function drawChart(points, metric) {
     const ctx = canvas.getContext("2d");
+    const darkMode = document.documentElement.dataset.theme === "dark";
+    const palette = darkMode
+        ? {
+            background: "#111827",
+            grid: "#475569",
+            text: "#e5e7eb",
+            line: "#60a5fa",
+            point: "#93c5fd",
+            latestPoint: "#3b82f6",
+            pointBorder: "#0f172a"
+        }
+        : {
+            background: "#f8fafc",
+            grid: "#cbd5e1",
+            text: "#0f172a",
+            line: "#2563eb",
+            point: "#60a5fa",
+            latestPoint: "#1d4ed8",
+            pointBorder: "#ffffff"
+        };
     const bounds = canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(bounds.width));
     const height = window.innerWidth <= 420 ? 250 : window.innerWidth <= 620 ? 280 : 320;
@@ -365,9 +385,9 @@ function drawChart(points, metric) {
     const stepX = points.length > 1 ? chartWidth / (points.length - 1) : 0;
 
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#f8fafc";
+    ctx.fillStyle = palette.background;
     ctx.fillRect(0, 0, width, height);
-    ctx.strokeStyle = "#cbd5e1";
+    ctx.strokeStyle = palette.grid;
     ctx.lineWidth = 1;
     for (let line = 0; line <= 4; line += 1) {
         const y = padding.top + ((chartHeight / 4) * line);
@@ -377,7 +397,7 @@ function drawChart(points, metric) {
         ctx.stroke();
     }
 
-    ctx.fillStyle = "#0f172a";
+    ctx.fillStyle = palette.text;
     ctx.font = `${width <= 480 ? 12 : 14}px Arial`;
     ctx.textAlign = "left";
     ctx.fillText(metricOptions[metric].label, 12, 20);
@@ -391,7 +411,7 @@ function drawChart(points, metric) {
 
     ctx.beginPath();
     chartPoints.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
-    ctx.strokeStyle = "#2563eb";
+    ctx.strokeStyle = palette.line;
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -403,12 +423,12 @@ function drawChart(points, metric) {
     chartPoints.forEach((chartPoint, index) => {
         ctx.beginPath();
         ctx.arc(chartPoint.x, chartPoint.y, 6, 0, Math.PI * 2);
-        ctx.fillStyle = index === chartPoints.length - 1 ? "#1d4ed8" : "#60a5fa";
+        ctx.fillStyle = index === chartPoints.length - 1 ? palette.latestPoint : palette.point;
         ctx.fill();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "#ffffff";
+        ctx.strokeStyle = palette.pointBorder;
         ctx.stroke();
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = palette.text;
         ctx.font = `${width <= 480 ? 10 : 12}px Arial`;
         ctx.textAlign = "center";
         const isLastPoint = index === chartPoints.length - 1;
@@ -509,6 +529,10 @@ async function initializeComparePage() {
 }
 
 initializeComparePage();
+
+window.addEventListener("workout-theme-changed", () => {
+    if (activeChartWorkouts.length) renderWorkoutChart(activeChartWorkouts);
+});
 
 backButton.addEventListener("click", () => {
     window.navigateWithTransition(exercise ? "compare.html" : "welcome.html", "back");
