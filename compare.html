@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compare Workout History</title>
-    <link rel="stylesheet" href="tracker.css?v=20261111-2">
+    <link rel="stylesheet" href="tracker.css?v=20261117-1">
     <script src="transitions.js?v=20261111-1"></script>
 </head>
 <body>
@@ -32,7 +32,7 @@
                         </select>
                     </label>
                 </div>
-                <p class="chart-edit-note" id="chartEditNote" hidden>Select a point on the chart to Edit or Delete</p>
+                <p class="chart-edit-note" id="chartEditNote" hidden>Select a point on the chart to Post, Edit, or Delete</p>
                 <canvas id="historyChart" width="700" height="320"></canvas>
                 <div class="chart-details" id="chartDetails"></div>
             </div>
@@ -76,8 +76,20 @@
                 <h2 id="workoutActionTitle">Workout options</h2>
                 <p id="selectedWorkoutSummary"></p>
                 <div class="modal-actions">
+                    <button type="button" class="share-workout-button" id="shareWorkoutButton">Post to Wall</button>
                     <button type="button" class="edit-workout-button" id="editWorkoutButton">Edit</button>
                     <button type="button" class="delete-workout-button" id="deleteWorkoutButton">Delete</button>
+                </div>
+            </div>
+            <div id="shareWorkoutPanel" hidden>
+                <h2>Post workout to your wall?</h2>
+                <p id="shareWorkoutSummary"></p>
+                <label for="shareWorkoutCaption">Caption <span class="optional-label">(optional)</span></label>
+                <textarea id="shareWorkoutCaption" rows="3" maxlength="300" placeholder="Proud of this one!"></textarea>
+                <p class="modal-inline-status" id="shareWorkoutStatus" aria-live="polite"></p>
+                <div class="modal-actions">
+                    <button type="button" class="share-workout-button" id="confirmShareButton">Post</button>
+                    <button type="button" class="cancel-button" id="cancelShareButton">Cancel</button>
                 </div>
             </div>
             <div id="deleteConfirmation" hidden>
@@ -96,6 +108,7 @@
     <script src="auth-service.js?v=20260930-1"></script>
     <script src="online-data.js?v=20260930-1"></script>
     <script src="auth-header.js?v=20260928-2"></script>
-    <script src="compare.js?v=20261111-1"></script>
+    <script src="social-service.js?v=20261117-1"></script>
+    <script src="compare.js?v=20261117-1"></script>
 </body>
 </html>

@@ -128,14 +128,22 @@
             syncLocalProfile(data.user);
             return data;
         },
-        async signUp(email, password, firstName) {
+        async isUsernameAvailable(username) {
+            if (!client) throw new Error("Online login has not been configured yet.");
+            const cleanUsername = String(username || "").trim().toLowerCase().replace(/^@/, "");
+            const { data, error } = await client.rpc("is_username_available", { p_username: cleanUsername });
+            if (error) throw error;
+            return Boolean(data);
+        },
+        async signUp(email, password, firstName, username) {
             if (!client) throw new Error("Online login has not been configured yet.");
             const emailRedirectTo = new URL("email-confirmed.html", window.location.href).href;
+            const cleanUsername = String(username || "").trim().toLowerCase().replace(/^@/, "");
             const { data, error } = await client.auth.signUp({
                 email,
                 password,
                 options: {
-                    data: { first_name: firstName },
+                    data: { first_name: firstName, username: cleanUsername },
                     emailRedirectTo
                 }
             });

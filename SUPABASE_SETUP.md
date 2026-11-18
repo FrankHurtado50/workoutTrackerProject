@@ -62,3 +62,11 @@ This creates one protected data record per account. Row Level Security restricts
 Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `photo-board-setup.sql`, and select **Run**.
 
 This creates a private image bucket and protected photo metadata. Each signed-in user can access only the photos stored inside their own account folder. Images are never made public; the website displays them using short-lived signed links.
+
+## 7. Add usernames, friends, and workout walls
+
+Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `social-setup.sql`, and select **Run**.
+
+This adds unique searchable usernames, friend requests, and workout wall posts. Row Level Security allows a wall post to be read only by its owner and their accepted friends. Email addresses, private workout notes, routines, and photo-board images are never included in social search or wall posts.
+
+Existing accounts will choose a username the first time they open **Friends & workout wall**. New accounts choose an available username while signing up.

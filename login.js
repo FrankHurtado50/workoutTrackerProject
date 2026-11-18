@@ -5,13 +5,64 @@ const loginEmailInput = document.getElementById("loginEmail");
 const loginPasswordInput = document.getElementById("loginPassword");
 const signupEmailInput = document.getElementById("signupEmail");
 const signupFirstNameInput = document.getElementById("signupFirstName");
+const signupUsernameInput = document.getElementById("signupUsername");
+const signupUsernameStatus = document.getElementById("signupUsernameStatus");
 const signupPasswordInput = document.getElementById("signupPassword");
 const signupConfirmPasswordInput = document.getElementById("signupConfirmPassword");
 const loginSubmitButton = loginForm.querySelector('button[type="submit"]');
 const signupSubmitButton = signupForm.querySelector('button[type="submit"]');
+let usernameCheckTimer = null;
+let lastAvailableUsername = "";
 
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function normalizeUsername(value) {
+    return String(value || "").trim().toLowerCase().replace(/^@/, "");
+}
+
+function getUsernameValidationError(value) {
+    const username = normalizeUsername(value);
+    if (username.length < 3 || username.length > 20) return "Use between 3 and 20 characters.";
+    if (!/^[a-z0-9_]+$/.test(username)) return "Use only letters, numbers, and underscores.";
+    return "";
+}
+
+function setUsernameStatus(message, type = "") {
+    signupUsernameStatus.textContent = message;
+    signupUsernameStatus.className = `username-status signup-username-status ${type}`.trim();
+}
+
+async function checkUsernameAvailability(value) {
+    const username = normalizeUsername(value);
+    const validationError = getUsernameValidationError(username);
+    lastAvailableUsername = "";
+    if (validationError) {
+        setUsernameStatus(validationError, "error");
+        return false;
+    }
+    setUsernameStatus("Checking availability...");
+    try {
+        const available = await window.workoutAuth.isUsernameAvailable(username);
+        if (normalizeUsername(signupUsernameInput.value) !== username) return false;
+        if (available) {
+            lastAvailableUsername = username;
+            setUsernameStatus(`@${username} is available.`, "success");
+            return true;
+        }
+        setUsernameStatus(`@${username} is already taken.`, "error");
+        return false;
+    } catch (error) {
+        const message = String(error && error.message || "").toLowerCase();
+        setUsernameStatus(
+            message.includes("function") || message.includes("schema cache")
+                ? "Username setup is not ready yet. Run social-setup.sql in Supabase."
+                : getFriendlyAuthError(error),
+            "error"
+        );
+        return false;
+    }
 }
 
 function setMessage(text, type = "error") {
@@ -40,17 +91,35 @@ function getFriendlyAuthError(error) {
     if (message.includes("invalid login credentials")) return "The email or password is incorrect.";
     if (message.includes("email not confirmed")) return "Please confirm your email before logging in.";
     if (message.includes("user already registered")) return "This email is already signed up.";
+    if (message.includes("database error") || (message.includes("username") && message.includes("taken"))) return "That username was just taken. Please choose another one.";
     if (message.includes("password") && message.includes("characters")) return "Please use a password with at least 6 characters.";
     if (message.includes("rate limit")) return "Too many attempts. Please wait a moment and try again.";
     if (message.includes("fetch") || message.includes("network")) return "Unable to reach the login service. Check your internet connection.";
     return error && error.message ? error.message : "Something went wrong. Please try again.";
 }
 
-[loginEmailInput, loginPasswordInput, signupEmailInput, signupFirstNameInput, signupPasswordInput, signupConfirmPasswordInput].forEach((input) => {
+[loginEmailInput, loginPasswordInput, signupEmailInput, signupFirstNameInput, signupUsernameInput, signupPasswordInput, signupConfirmPasswordInput].forEach((input) => {
     input.addEventListener("input", () => {
         input.classList.remove("invalid");
         clearMessage();
     });
+});
+
+signupUsernameInput.addEventListener("input", () => {
+    window.clearTimeout(usernameCheckTimer);
+    lastAvailableUsername = "";
+    const username = normalizeUsername(signupUsernameInput.value);
+    if (!username) {
+        setUsernameStatus("Friends will use this to find you.");
+        return;
+    }
+    const validationError = getUsernameValidationError(username);
+    if (validationError) {
+        setUsernameStatus(validationError, "error");
+        return;
+    }
+    setUsernameStatus("Checking availability...");
+    usernameCheckTimer = window.setTimeout(() => checkUsernameAvailability(username), 350);
 });
 
 loginForm.addEventListener("submit", async (event) => {
@@ -89,12 +158,14 @@ signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = signupEmailInput.value.trim();
     const firstName = signupFirstNameInput.value.trim();
+    const username = normalizeUsername(signupUsernameInput.value);
     const password = signupPasswordInput.value;
     const confirmPassword = signupConfirmPasswordInput.value;
 
-    if (!firstName || !email || !password || !confirmPassword) {
-        setMessage("Please fill in your first name, email, and password.");
+    if (!firstName || !username || !email || !password || !confirmPassword) {
+        setMessage("Please fill in your first name, username, email, and password.");
         signupFirstNameInput.classList.toggle("invalid", !firstName);
+        signupUsernameInput.classList.toggle("invalid", !username);
         signupEmailInput.classList.toggle("invalid", !email);
         signupPasswordInput.classList.toggle("invalid", !password);
         signupConfirmPasswordInput.classList.toggle("invalid", !confirmPassword);
@@ -104,6 +175,13 @@ signupForm.addEventListener("submit", async (event) => {
     if (!isValidEmail(email)) {
         setMessage("Please enter a valid email address.");
         signupEmailInput.classList.add("invalid");
+        return;
+    }
+
+    const usernameValidationError = getUsernameValidationError(username);
+    if (usernameValidationError) {
+        setMessage(usernameValidationError);
+        signupUsernameInput.classList.add("invalid");
         return;
     }
 
@@ -124,7 +202,13 @@ signupForm.addEventListener("submit", async (event) => {
 
     setFormBusy(signupForm, true, "Creating Account...");
     try {
-        const data = await window.workoutAuth.signUp(email, password, firstName);
+        const usernameAvailable = lastAvailableUsername === username || await checkUsernameAvailability(username);
+        if (!usernameAvailable) {
+            signupUsernameInput.classList.add("invalid");
+            setMessage("Please choose an available username.");
+            return;
+        }
+        const data = await window.workoutAuth.signUp(email, password, firstName, username);
         if (data.session) {
             setMessage(`Welcome ${firstName}!`, "success");
             redirectToWelcome();

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends &amp; Wall</title>
+    <link rel="stylesheet" href="tracker.css?v=20261117-1">
+    <script src="transitions.js?v=20261111-1"></script>
+</head>
+<body>
+    <div class="page-header">
+        <a class="home-button" href="welcome.html">Home</a>
+        <a class="login-button" href="login.html">Log In</a>
+    </div>
+
+    <main class="social-page">
+        <section class="social-onboarding" id="socialOnboarding" hidden>
+            <p class="social-eyebrow">ONE LAST STEP</p>
+            <h1>Choose your username</h1>
+            <p>Your username is how friends will find you. It is public, unique, and cannot be changed in this first version.</p>
+            <form class="username-claim-form" id="usernameClaimForm">
+                <label for="claimUsername">Username</label>
+                <div class="username-input-wrap">
+                    <span aria-hidden="true">@</span>
+                    <input id="claimUsername" type="text" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" placeholder="taylor_lifts" required>
+                </div>
+                <p class="username-help">3–20 characters. Use letters, numbers, or underscores.</p>
+                <p class="username-status" id="claimUsernameStatus" aria-live="polite"></p>
+                <button type="submit">Save Username</button>
+            </form>
+        </section>
+
+        <section class="social-shell" id="socialShell" hidden>
+            <header class="social-heading">
+                <div>
+                    <p class="social-eyebrow">FRIENDS ONLY</p>
+                    <h1>Your Workout Wall</h1>
+                    <p id="socialIdentity">Share the work you are proud of.</p>
+                </div>
+                <button class="secondary-button social-refresh" id="refreshSocialButton" type="button">Refresh</button>
+            </header>
+
+            <div class="social-layout">
+                <section class="social-panel wall-panel" aria-labelledby="wallHeading">
+                    <div class="social-panel-heading">
+                        <div>
+                            <h2 id="wallHeading">Latest posts</h2>
+                            <p>Only you and accepted friends can see these posts.</p>
+                        </div>
+                        <a class="social-history-link" href="compare.html">Share a workout</a>
+                    </div>
+                    <p class="social-status" id="wallStatus" aria-live="polite">Loading your wall...</p>
+                    <div class="wall-feed" id="wallFeed"></div>
+                </section>
+
+                <aside class="social-panel people-panel" aria-labelledby="peopleHeading">
+                    <div class="social-panel-heading">
+                        <div>
+                            <h2 id="peopleHeading">Find friends</h2>
+                            <p>Search by their exact username or the first few letters.</p>
+                        </div>
+                    </div>
+                    <form class="user-search-form" id="userSearchForm">
+                        <label class="sr-only" for="userSearchInput">Search usernames</label>
+                        <div class="user-search-row">
+                            <div class="username-input-wrap">
+                                <span aria-hidden="true">@</span>
+                                <input id="userSearchInput" type="search" autocomplete="off" placeholder="username" maxlength="20">
+                            </div>
+                            <button type="submit">Search</button>
+                        </div>
+                    </form>
+                    <p class="social-status" id="searchStatus" aria-live="polite"></p>
+                    <div class="people-list" id="searchResults"></div>
+
+                    <div class="connections-section">
+                        <h3>Friend requests</h3>
+                        <div class="people-list" id="friendRequests"></div>
+                    </div>
+                    <div class="connections-section">
+                        <h3>Your friends</h3>
+                        <div class="people-list" id="friendsList"></div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="social-error" id="socialError" hidden>
+            <h1 id="socialErrorTitle">Friends &amp; Wall needs one setup step</h1>
+            <p id="socialErrorMessage">Run social-setup.sql in your Supabase SQL Editor, then refresh this page.</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260928-2"></script>
+    <script src="auth-service.js?v=20261117-1"></script>
+    <script src="auth-header.js?v=20260928-2"></script>
+    <script src="social-service.js?v=20261117-1"></script>
+    <script src="social.js?v=20261117-1"></script>
+</body>
+</html>

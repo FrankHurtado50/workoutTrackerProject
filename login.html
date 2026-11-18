@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In</title>
-    <link rel="stylesheet" href="tracker.css?v=20261111-2">
+    <link rel="stylesheet" href="tracker.css?v=20261117-1">
     <script src="transitions.js?v=20261111-1"></script>
 </head>
 <body>
@@ -39,6 +39,13 @@
                     <label for="signupFirstName">First Name</label>
                     <input type="text" id="signupFirstName" autocomplete="given-name" placeholder="Taylor">
 
+                    <label for="signupUsername">Username</label>
+                    <div class="username-input-wrap signup-username-wrap">
+                        <span aria-hidden="true">@</span>
+                        <input type="text" id="signupUsername" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" placeholder="taylor_lifts">
+                    </div>
+                    <p class="username-status signup-username-status" id="signupUsernameStatus" aria-live="polite">Friends will use this to find you.</p>
+
                     <label for="signupPassword">Password</label>
                     <input type="password" id="signupPassword" autocomplete="new-password" minlength="6" placeholder="Create a password">
 
@@ -55,7 +62,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260928-2"></script>
-    <script src="auth-service.js?v=20261001-1"></script>
-    <script src="login.js?v=20260929-1"></script>
+    <script src="auth-service.js?v=20261117-1"></script>
+    <script src="login.js?v=20261117-1"></script>
 </body>
 </html>

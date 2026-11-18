@@ -19,6 +19,13 @@ const deleteConfirmation = document.getElementById("deleteConfirmation");
 const selectedWorkoutSummary = document.getElementById("selectedWorkoutSummary");
 const editWorkoutButton = document.getElementById("editWorkoutButton");
 const deleteWorkoutButton = document.getElementById("deleteWorkoutButton");
+const shareWorkoutButton = document.getElementById("shareWorkoutButton");
+const shareWorkoutPanel = document.getElementById("shareWorkoutPanel");
+const shareWorkoutSummary = document.getElementById("shareWorkoutSummary");
+const shareWorkoutCaption = document.getElementById("shareWorkoutCaption");
+const shareWorkoutStatus = document.getElementById("shareWorkoutStatus");
+const confirmShareButton = document.getElementById("confirmShareButton");
+const cancelShareButton = document.getElementById("cancelShareButton");
 const confirmDeleteButton = document.getElementById("confirmDeleteButton");
 const cancelDeleteButton = document.getElementById("cancelDeleteButton");
 const closeWorkoutModal = document.getElementById("closeWorkoutModal");
@@ -457,8 +464,8 @@ function renderWorkoutChart(workouts) {
         ? `<p class="workout-note"><strong>Latest note:</strong> ${escapeHtml(latestNote).replace(/\r?\n/g, "<br>")}</p>`
         : "";
     const actionHint = group === "workout"
-        ? '<p class="chart-action-hint">Click a dot to edit or delete that workout.</p>'
-        : '<p class="chart-action-hint">Choose “Each workout” to edit or delete an individual entry.</p>';
+        ? '<p class="chart-action-hint">Click a dot to post, edit, or delete that workout.</p>'
+        : '<p class="chart-action-hint">Choose “Each workout” to post, edit, or delete an individual entry.</p>';
     drawChart(points, metric);
     chartDetails.innerHTML = `${getProgressMessage(points, metric)}<p class="chart-summary">Showing ${points.length} ${group === "workout" ? "workout" : group} point(s) for <strong>${escapeHtml(exercise)}</strong>.<br>Latest ${option.label.toLowerCase()}: ${latest.value} ${option.unit}.</p>${noteSummary}${actionHint}`;
 }
@@ -479,6 +486,7 @@ function findWorkoutAtCanvasPosition(event) {
 function closeActionModal() {
     workoutActionModal.hidden = true;
     workoutActions.hidden = false;
+    shareWorkoutPanel.hidden = true;
     deleteConfirmation.hidden = true;
     selectedWorkout = null;
 }
@@ -487,6 +495,7 @@ function openActionModal(workout) {
     selectedWorkout = workout;
     selectedWorkoutSummary.textContent = `${workout.exercise} on ${formatDate(workout.recordedAt)} — ${workout.total} lbs total`;
     workoutActions.hidden = false;
+    shareWorkoutPanel.hidden = true;
     deleteConfirmation.hidden = true;
     workoutActionModal.hidden = false;
     editWorkoutButton.focus();
@@ -559,6 +568,51 @@ canvas.addEventListener("mousemove", (event) => {
 editWorkoutButton.addEventListener("click", () => {
     if (selectedWorkout) {
         window.navigateWithTransition(`tracker.html?edit=${encodeURIComponent(selectedWorkout.id)}`, "forward");
+    }
+});
+
+shareWorkoutButton.addEventListener("click", async () => {
+    if (!selectedWorkout) return;
+    await window.workoutSocial.ready;
+    if (window.workoutSocial.error) {
+        if (String(window.workoutSocial.error.message || "").toLowerCase().includes("log in")) {
+            window.navigateWithTransition("social.html", "forward");
+            return;
+        }
+        alert("The wall needs its Supabase setup first. Run social-setup.sql, then try again.");
+        return;
+    }
+    if (!window.workoutSocial.profile || !window.workoutSocial.profile.username) {
+        window.navigateWithTransition("social.html", "forward");
+        return;
+    }
+    workoutActions.hidden = true;
+    shareWorkoutPanel.hidden = false;
+    shareWorkoutSummary.textContent = `${selectedWorkout.exercise} — ${selectedWorkout.total} lbs total`;
+    shareWorkoutCaption.value = "";
+    shareWorkoutStatus.textContent = "Only accepted friends can see this post.";
+    shareWorkoutCaption.focus();
+});
+
+cancelShareButton.addEventListener("click", () => {
+    shareWorkoutPanel.hidden = true;
+    workoutActions.hidden = false;
+    shareWorkoutButton.focus();
+});
+
+confirmShareButton.addEventListener("click", async () => {
+    if (!selectedWorkout) return;
+    confirmShareButton.disabled = true;
+    confirmShareButton.textContent = "Posting...";
+    shareWorkoutStatus.textContent = "";
+    try {
+        await window.workoutSocial.createWallPost(selectedWorkout, shareWorkoutCaption.value);
+        shareWorkoutStatus.textContent = "Posted! Opening your wall...";
+        window.setTimeout(() => window.navigateWithTransition("social.html", "forward"), 450);
+    } catch (error) {
+        shareWorkoutStatus.textContent = error && error.message ? error.message : "Unable to post this workout. Please try again.";
+        confirmShareButton.disabled = false;
+        confirmShareButton.textContent = "Post";
     }
 });
 
