@@ -121,6 +121,10 @@ body.photo-modal-open {
 }
 
 .page-header .home-button {
+    margin-right: 0;
+}
+
+.page-header .theme-toggle {
     margin-right: auto;
 }
 

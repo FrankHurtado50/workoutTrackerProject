@@ -53,7 +53,12 @@
             activeTheme = applyTheme(activeTheme === "dark" ? "light" : "dark", true);
             updateThemeToggle(button);
         });
-        header.appendChild(button);
+        const homeButton = header.querySelector(".home-button");
+        if (homeButton) {
+            homeButton.insertAdjacentElement("afterend", button);
+        } else {
+            header.insertBefore(button, header.firstChild);
+        }
     });
 
     window.addEventListener("storage", function (event) {
