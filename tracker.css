@@ -174,6 +174,40 @@ body.photo-modal-open {
     transform: translateY(-1px) rotate(8deg);
 }
 
+.friends-header-link {
+    background: #16a34a;
+}
+
+.friends-header-link:hover {
+    background: #15803d;
+}
+
+.global-logout-area {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 9;
+}
+
+.global-logout-button {
+    min-height: 40px;
+    padding: 8px 15px;
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 5px 15px rgba(15, 23, 42, 0.16);
+    color: #475569;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.global-logout-button:hover {
+    border-color: #dc2626;
+    background: #fff1f2;
+    color: #b91c1c;
+}
+
 .back-link {
     align-self: flex-start;
     margin-bottom: 16px;
@@ -3218,6 +3252,18 @@ html[data-theme="dark"] .theme-toggle {
 
 html[data-theme="dark"] .theme-toggle:hover {
     background: #1e293b;
+}
+
+html[data-theme="dark"] .global-logout-button {
+    border-color: #475569;
+    background: rgba(15, 23, 42, 0.94);
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .global-logout-button:hover {
+    border-color: #ef4444;
+    background: #450a0a;
+    color: #fecaca;
 }
 
 html[data-theme="dark"] :is(

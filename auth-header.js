@@ -39,22 +39,49 @@ async function handleLogout(authLink) {
     }
 }
 
+function getOrCreateLogoutButton() {
+    let logoutArea = document.getElementById("globalLogoutArea");
+    if (!logoutArea) {
+        logoutArea = document.createElement("div");
+        logoutArea.id = "globalLogoutArea";
+        logoutArea.className = "global-logout-area";
+
+        const logoutButton = document.createElement("button");
+        logoutButton.type = "button";
+        logoutButton.className = "global-logout-button";
+        logoutButton.textContent = "Log Out";
+        logoutButton.addEventListener("click", () => {
+            if (logoutButton.getAttribute("aria-disabled") !== "true") handleLogout(logoutButton);
+        });
+        logoutArea.appendChild(logoutButton);
+        document.body.appendChild(logoutArea);
+    }
+    return logoutArea.querySelector(".global-logout-button");
+}
+
+function removeLogoutButton() {
+    const logoutArea = document.getElementById("globalLogoutArea");
+    if (logoutArea) logoutArea.remove();
+}
+
 function updateAuthHeader() {
     const authLink = document.querySelector(".page-header .login-button");
     if (!authLink) return;
 
     if (isLoggedIn()) {
-        authLink.textContent = "Log Out";
-        authLink.removeAttribute("href");
-        authLink.onclick = (event) => {
-            event.preventDefault();
-            if (authLink.getAttribute("aria-disabled") !== "true") handleLogout(authLink);
-        };
+        authLink.textContent = "Find Friends";
+        authLink.setAttribute("href", "social.html#find-friends");
+        authLink.classList.add("friends-header-link");
+        authLink.removeAttribute("aria-disabled");
+        authLink.onclick = null;
+        getOrCreateLogoutButton();
     } else {
         authLink.textContent = "Log In/Sign Up";
         authLink.setAttribute("href", "login.html");
+        authLink.classList.remove("friends-header-link");
         authLink.removeAttribute("aria-disabled");
         authLink.onclick = null;
+        removeLogoutButton();
     }
 }
 

@@ -19,6 +19,14 @@ const refreshSocialButton = document.getElementById("refreshSocialButton");
 
 let availabilityTimer = null;
 
+function focusFriendSearch() {
+    if (window.location.hash !== "#find-friends" || socialShell.hidden) return;
+    window.setTimeout(() => {
+        document.getElementById("find-friends").scrollIntoView({ behavior: "smooth", block: "start" });
+        userSearchInput.focus({ preventScroll: true });
+    }, 120);
+}
+
 function escapeHtml(value) {
     return String(value || "")
         .replace(/&/g, "&amp;")
@@ -264,6 +272,7 @@ async function initializeSocialContent() {
     const profile = window.workoutSocial.profile;
     socialIdentity.textContent = `${profile.display_name || "Athlete"} · @${profile.username}`;
     await Promise.allSettled([loadWall(), refreshConnections()]);
+    focusFriendSearch();
 }
 
 async function initializeSocialPage() {
@@ -294,3 +303,4 @@ async function initializeSocialPage() {
 }
 
 initializeSocialPage();
+window.addEventListener("hashchange", focusFriendSearch);
