@@ -64,6 +64,27 @@ function removeLogoutButton() {
     if (logoutArea) logoutArea.remove();
 }
 
+function getOrCreateWallLink(authLink) {
+    if (!document.querySelector(".home-welcome-card")) return null;
+
+    let wallLink = document.getElementById("globalWallLink");
+    if (!wallLink) {
+        wallLink = document.createElement("a");
+        wallLink.id = "globalWallLink";
+        wallLink.className = "login-button wall-header-link";
+        wallLink.href = "social.html";
+        wallLink.textContent = "The Wall";
+    }
+
+    authLink.insertAdjacentElement("afterend", wallLink);
+    return wallLink;
+}
+
+function removeWallLink() {
+    const wallLink = document.getElementById("globalWallLink");
+    if (wallLink) wallLink.remove();
+}
+
 function updateAuthHeader() {
     const authLink = document.querySelector(".page-header .login-button");
     if (!authLink) return;
@@ -74,6 +95,7 @@ function updateAuthHeader() {
         authLink.classList.add("friends-header-link");
         authLink.removeAttribute("aria-disabled");
         authLink.onclick = null;
+        getOrCreateWallLink(authLink);
         getOrCreateLogoutButton();
     } else {
         authLink.textContent = "Log In/Sign Up";
@@ -81,6 +103,7 @@ function updateAuthHeader() {
         authLink.classList.remove("friends-header-link");
         authLink.removeAttribute("aria-disabled");
         authLink.onclick = null;
+        removeWallLink();
         removeLogoutButton();
     }
 }
