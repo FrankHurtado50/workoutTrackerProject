@@ -70,3 +70,9 @@ Open **SQL Editor** in Supabase, select **New query**, paste the complete conten
 This adds unique searchable usernames, friend requests, and workout wall posts. Row Level Security allows a wall post to be read only by its owner and their accepted friends. Email addresses, private workout notes, routines, and photo-board images are never included in social search or wall posts.
 
 Existing accounts will choose a username the first time they open **Friends & workout wall**. New accounts choose an available username while signing up.
+
+## 8. Add likes, comments, and notifications
+
+Open **SQL Editor** in Supabase, select **New query**, paste the complete contents of `social-notifications-setup.sql`, and select **Run**.
+
+This adds protected likes and comments to wall posts, plus notifications for incoming friend requests, accepted friend requests, likes, and comments. Notifications are visible only to their recipient, and users can interact only with posts they are already allowed to view.

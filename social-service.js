@@ -2,6 +2,7 @@
     let session = null;
     let profile = null;
     let setupError = null;
+    let engagementReady = true;
 
     function getClient() {
         return window.workoutAuth && typeof window.workoutAuth.getClient === "function"
@@ -127,13 +128,28 @@
     async function getWallPosts() {
         await ready;
         const client = getClient();
-        const { data, error } = await client
+        let result = await client
             .from("wall_posts")
-            .select("id, user_id, workout_id, workout, caption, created_at, author:profiles!wall_posts_user_id_fkey(username, display_name)")
+            .select("id, user_id, workout_id, workout, caption, created_at, author:profiles!wall_posts_user_id_fkey(username, display_name), likes:wall_post_likes(user_id), comments:wall_post_comments(id, user_id, body, created_at, author:profiles!wall_post_comments_user_id_fkey(username, display_name))")
             .order("created_at", { ascending: false })
             .limit(100);
-        if (error) throw error;
-        return Array.isArray(data) ? data : [];
+        if (result.error) {
+            const message = String(result.error.message || "").toLowerCase();
+            const missingEngagementSetup = message.includes("wall_post_likes")
+                || message.includes("wall_post_comments")
+                || (message.includes("relationship") && message.includes("wall_posts"));
+            if (!missingEngagementSetup) throw result.error;
+            engagementReady = false;
+            result = await client
+                .from("wall_posts")
+                .select("id, user_id, workout_id, workout, caption, created_at, author:profiles!wall_posts_user_id_fkey(username, display_name)")
+                .order("created_at", { ascending: false })
+                .limit(100);
+        } else {
+            engagementReady = true;
+        }
+        if (result.error) throw result.error;
+        return Array.isArray(result.data) ? result.data : [];
     }
 
     function buildWorkoutSnapshot(workout) {
@@ -184,6 +200,52 @@
         if (error) throw error;
     }
 
+    async function toggleWallPostLike(postId, isLiked) {
+        await ready;
+        await requireSession();
+        const client = getClient();
+        if (isLiked) {
+            const { error } = await client
+                .from("wall_post_likes")
+                .delete()
+                .eq("post_id", postId)
+                .eq("user_id", session.user.id);
+            if (error) throw error;
+            return false;
+        }
+        const { error } = await client
+            .from("wall_post_likes")
+            .insert({ post_id: postId, user_id: session.user.id });
+        if (error) throw error;
+        return true;
+    }
+
+    async function addWallPostComment(postId, body) {
+        await ready;
+        await requireSession();
+        const cleanBody = String(body || "").trim();
+        if (!cleanBody) throw new Error("Write a comment before posting.");
+        const client = getClient();
+        const { data, error } = await client
+            .from("wall_post_comments")
+            .insert({ post_id: postId, user_id: session.user.id, body: cleanBody.slice(0, 240) })
+            .select("id")
+            .single();
+        if (error) throw error;
+        return data;
+    }
+
+    async function deleteWallPostComment(commentId) {
+        await ready;
+        await requireSession();
+        const client = getClient();
+        const { error } = await client
+            .from("wall_post_comments")
+            .delete()
+            .eq("id", commentId);
+        if (error) throw error;
+    }
+
     window.workoutSocial = {
         ready,
         normalizeUsername,
@@ -199,6 +261,9 @@
         getWallPosts,
         createWallPost,
         deleteWallPost,
+        toggleWallPostLike,
+        addWallPostComment,
+        deleteWallPostComment,
         get profile() {
             return profile;
         },
@@ -207,6 +272,9 @@
         },
         get error() {
             return setupError;
+        },
+        get engagementReady() {
+            return engagementReady;
         }
     };
 })();

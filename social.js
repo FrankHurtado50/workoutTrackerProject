@@ -27,6 +27,14 @@ function focusFriendSearch() {
     }, 120);
 }
 
+function focusWallPost() {
+    if (!window.location.hash.startsWith("#post-") || socialShell.hidden) return;
+    window.setTimeout(() => {
+        const post = document.getElementById(window.location.hash.slice(1));
+        if (post) post.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 160);
+}
+
 function escapeHtml(value) {
     return String(value || "")
         .replace(/&/g, "&amp;")
@@ -60,7 +68,8 @@ function setStatus(element, message, type = "") {
 function getFriendlyError(error) {
     const message = String(error && error.message || "");
     const lower = message.toLowerCase();
-    if (lower.includes("relation") && lower.includes("does not exist")) return "Run social-setup.sql in your Supabase SQL Editor, then refresh this page.";
+    if (lower.includes("wall_post_likes") || lower.includes("wall_post_comments")) return "Run social-notifications-setup.sql in your Supabase SQL Editor, then refresh this page.";
+    if (lower.includes("relation") && lower.includes("does not exist")) return "Run social-setup.sql and social-notifications-setup.sql in your Supabase SQL Editor, then refresh this page.";
     if (lower.includes("could not find the function") || lower.includes("schema cache")) return "Finish the social database setup, then wait a few seconds and refresh.";
     if (lower.includes("username") && lower.includes("taken")) return "That username is already taken. Try another one.";
     if (lower.includes("please log in") || lower.includes("must be signed in")) return "Please log in to use friends and your wall.";
@@ -124,7 +133,7 @@ function renderPerson(person, location) {
     return item;
 }
 
-async function loadWall() {
+async function loadWall(focusPostId = "") {
     setStatus(wallStatus, "Loading your wall...");
     wallFeed.innerHTML = "";
     try {
@@ -140,13 +149,24 @@ async function loadWall() {
                 </div>`;
             return;
         }
-        setStatus(wallStatus, `${posts.length} recent ${posts.length === 1 ? "post" : "posts"}`);
+        setStatus(
+            wallStatus,
+            window.workoutSocial.engagementReady
+                ? `${posts.length} recent ${posts.length === 1 ? "post" : "posts"}`
+                : `${posts.length} recent ${posts.length === 1 ? "post" : "posts"} · Run social-notifications-setup.sql to turn on likes and comments.`
+        );
         posts.forEach((post) => {
             const workout = post.workout || {};
             const author = Array.isArray(post.author) ? post.author[0] : post.author;
             const isOwnPost = post.user_id === window.workoutSocial.userId;
+            const likes = Array.isArray(post.likes) ? post.likes : [];
+            const comments = (Array.isArray(post.comments) ? post.comments : [])
+                .slice()
+                .sort((left, right) => new Date(left.created_at) - new Date(right.created_at));
+            const isLiked = likes.some((like) => like.user_id === window.workoutSocial.userId);
             const card = document.createElement("article");
             card.className = "wall-post";
+            card.id = `post-${post.id}`;
             card.innerHTML = `
                 <div class="wall-post-header">
                     <div class="wall-avatar" aria-hidden="true">${escapeHtml((author && author.display_name || "A").charAt(0).toUpperCase())}</div>
@@ -163,7 +183,28 @@ async function loadWall() {
                     <strong>${Number(workout.total) || 0} lbs total volume</strong>
                     <span>${escapeHtml(getWorkoutDetails(workout))}</span>
                     <time>${escapeHtml(formatDate(workout.recordedAt))}</time>
-                </div>`;
+                </div>
+                ${window.workoutSocial.engagementReady ? `<div class="wall-engagement">
+                    <button class="wall-like-button${isLiked ? " active" : ""}" type="button" aria-pressed="${isLiked}"><span aria-hidden="true">&#9829;</span> ${isLiked ? "Liked" : "Like"} (${likes.length})</button>
+                    <button class="wall-comment-toggle" type="button">Comment (${comments.length})</button>
+                </div>
+                <div class="wall-comments">
+                    ${comments.map((comment) => {
+                        const commentAuthor = Array.isArray(comment.author) ? comment.author[0] : comment.author;
+                        const canDelete = comment.user_id === window.workoutSocial.userId || isOwnPost;
+                        return `<article class="wall-comment">
+                            <strong>@${escapeHtml(commentAuthor && commentAuthor.username || "athlete")}</strong>
+                            <time datetime="${escapeHtml(comment.created_at)}">${escapeHtml(formatDate(comment.created_at, { month: "short", day: "numeric" }))}</time>
+                            ${canDelete ? `<button class="wall-comment-delete" type="button" data-comment-id="${escapeHtml(comment.id)}" aria-label="Delete comment">Delete</button>` : ""}
+                            <p>${escapeHtml(comment.body)}</p>
+                        </article>`;
+                    }).join("")}
+                    <form class="wall-comment-form">
+                        <label class="sr-only" for="comment-${escapeHtml(post.id)}">Comment on ${escapeHtml(workout.exercise || "this workout")}</label>
+                        <input id="comment-${escapeHtml(post.id)}" type="text" maxlength="240" placeholder="Write a comment..." required>
+                        <button type="submit">Post</button>
+                    </form>
+                </div>` : ""}`;
             const deleteButton = card.querySelector(".wall-delete");
             if (deleteButton) {
                 deleteButton.addEventListener("click", async () => {
@@ -178,8 +219,58 @@ async function loadWall() {
                     }
                 });
             }
+
+            const likeButton = card.querySelector(".wall-like-button");
+            if (likeButton) {
+                likeButton.addEventListener("click", async () => {
+                    likeButton.disabled = true;
+                    try {
+                        await window.workoutSocial.toggleWallPostLike(post.id, isLiked);
+                        await loadWall(post.id);
+                    } catch (error) {
+                        setStatus(wallStatus, getFriendlyError(error), "error");
+                        likeButton.disabled = false;
+                    }
+                });
+
+                const commentForm = card.querySelector(".wall-comment-form");
+                const commentInput = commentForm.querySelector("input");
+                card.querySelector(".wall-comment-toggle").addEventListener("click", () => commentInput.focus());
+                commentForm.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const submitButton = commentForm.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    try {
+                        await window.workoutSocial.addWallPostComment(post.id, commentInput.value);
+                        await loadWall(post.id);
+                    } catch (error) {
+                        setStatus(wallStatus, getFriendlyError(error), "error");
+                        submitButton.disabled = false;
+                    }
+                });
+
+                card.querySelectorAll(".wall-comment-delete").forEach((button) => {
+                    button.addEventListener("click", async () => {
+                        if (!window.confirm("Delete this comment?")) return;
+                        button.disabled = true;
+                        try {
+                            await window.workoutSocial.deleteWallPostComment(button.dataset.commentId);
+                            await loadWall(post.id);
+                        } catch (error) {
+                            setStatus(wallStatus, getFriendlyError(error), "error");
+                            button.disabled = false;
+                        }
+                    });
+                });
+            }
             wallFeed.appendChild(card);
         });
+        if (focusPostId) {
+            const focusedPost = document.getElementById(`post-${focusPostId}`);
+            if (focusedPost) focusedPost.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+            focusWallPost();
+        }
     } catch (error) {
         setStatus(wallStatus, getFriendlyError(error), "error");
     }
@@ -273,6 +364,7 @@ async function initializeSocialContent() {
     socialIdentity.textContent = `${profile.display_name || "Athlete"} · @${profile.username}`;
     await Promise.allSettled([loadWall(), refreshConnections()]);
     focusFriendSearch();
+    focusWallPost();
 }
 
 async function initializeSocialPage() {
@@ -304,3 +396,4 @@ async function initializeSocialPage() {
 
 initializeSocialPage();
 window.addEventListener("hashchange", focusFriendSearch);
+window.addEventListener("hashchange", focusWallPost);
